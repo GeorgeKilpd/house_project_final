@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+{% block title %}질문 등록 - AI 예측 시스템{% endblock %}
+{% block content %}
+<h2 style="text-align:center; color:#3f51b5; margin-bottom:1.5rem;">📝 질문 등록</h2>
+
+<form method="post" style="background:#fff; border-radius:10px; box-shadow:0 0 8px rgba(0,0,0,0.1); padding:2rem;">
+    {{ form.csrf_token }}
+
+    <!-- 에러 표시 -->
+    {% for field, errors in form.errors.items() %}
+    <div style="background:#ffcdd2; color:#b71c1c; padding:10px; border-radius:6px; margin-bottom:10px;">
+        <strong>{{ form[field].label }}</strong>: {{ ', '.join(errors) }}
+    </div>
+    {% endfor %}
+
+    <!-- 제목 입력 -->
+    <div style="margin-bottom:1.5rem;">
+        <label for="subject" style="display:block; font-weight:bold; margin-bottom:0.5rem;">제목</label>
+        <input type="text" name="subject" id="subject"
+               value="{{ form.subject.data or '' }}"
+               style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:1rem;">
+    </div>
+
+    <!-- 내용 입력 -->
+    <div style="margin-bottom:1.5rem;">
+        <label for="content" style="display:block; font-weight:bold; margin-bottom:0.5rem;">내용</label>
+        <textarea name="content" id="content" rows="10"
+                  style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; resize:vertical; font-family:'Noto Sans KR', sans-serif;">{{ form.content.data or '' }}</textarea>
+    </div>
+
+    <!-- 버튼 -->
+    <div style="text-align:right;">
+        <button type="submit"
+                style="background-color:#3f51b5; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">
+            저장하기
+        </button>
+    </div>
+</form>
+{% endblock %}

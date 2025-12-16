@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- 상단 간격 -->
+<div class="container mt-5 pt-5 mb-5">
+  <!-- 제목과 밑줄 -->
+  <div class="mb-4" style="width: 60%; margin: 0 auto;">
+    <h2 class="fw-bold" style="color: #385fac; text-align: left;">문의하기</h2>
+    <hr class="mb-5" style="border: 2px solid #385fac;"> <!-- 선 진하게 -->
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+      <thead>
+          <tr>
+            <th style="background-color: #385fac; color: white; border: 1.5px solid #385fac;">번호</th>
+            <th style="background-color: #385fac; color: white; border: 1.5px solid #385fac;">제목</th>
+            <th style="background-color: #385fac; color: white; border: 1.5px solid #385fac;">작성자</th>
+            <th style="background-color: #385fac; color: white; border: 1.5px solid #385fac;">날짜</th>
+
+          </tr>
+      </thead>
+      <tbody>
+        {% for q in question_list %}
+        <tr style="background-color: white; border: 1.5px solid #385fac;">
+          <td>{{ q.id }}</td>
+          <td>{{ q.subject }}</td>
+          <td>{{ q.author }}</td>
+          <td>{{ q.create_date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 페이지 네이션 더미 -->
+  <div class="d-flex justify-content-center mt-4">
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="#">«</a></li>
+        <li class="page-item"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item"><a class="page-link" href="#">»</a></li>
+      </ul>
+    </nav>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.log
+
+# macOS
+.DS_Store
+
+# venv
+.venv/
+venv/
+
+# DB (매우 중요)
+*.db
+*.sqlite
+*.sqlite3
+
+# zip
+*.zip
+
+# env
+.env
+

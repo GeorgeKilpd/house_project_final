@@ -1,0 +1,283 @@
+{% extends "layout.html" %}
+
+{% block title %}메인 | 청년 주거 솔루션{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+{% endblock %}
+
+{% block content %}
+
+<!-- =========================
+      HERO
+========================= -->
+<section class="hero-wrapper">
+    <div id="heroCarousel" class="carousel slide carousel-fade"
+         data-bs-ride="carousel" data-bs-interval="3500">
+        <div class="carousel-inner">
+
+            <div class="carousel-item active">
+                <div class="hero-slide"
+                     style="background-image:url('{{ url_for('static', filename='image/picture1.jpeg') }}');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h1>청년들의 안정적인 주거 선택을 돕다</h1>
+                        <p>경제·인프라·상권 정보를 기반으로 AI가 최적의 주거 선택을 제안합니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item">
+                <div class="hero-slide"
+                     style="background-image:url('{{ url_for('static', filename='image/picture2.jpg') }}');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h1>전월세 시장 정보, 한눈에</h1>
+                        <p>지역별 실거래 분석과 환경지표 기반의 예측 서비스</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-item">
+                <div class="hero-slide"
+                     style="background-image:url('{{ url_for('static', filename='image/picture3.jpg') }}');">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <h1>더 똑똑한 주거 선택</h1>
+                        <p>AI Agent 기반의 스마트한 주거 의사결정</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="carousel-control-prev" type="button"
+                data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button"
+                data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</section>
+
+
+<!-- =========================
+      FEATURE SECTION
+========================= -->
+<section class="feature-section">
+    <a href="{{ url_for('predict.predict_search') }}" class="feature-card">
+        <img src="{{ url_for('static', filename='image/housepic.jpg') }}" alt="">
+        <div class="feature-overlay"></div>
+        <div class="feature-content">
+            <h3>전월세 예측</h3>
+            <span class="feature-btn">바로가기</span>
+        </div>
+    </a>
+
+    <a href="{{ url_for('support.support_search') }}" class="feature-card">
+        <img src="{{ url_for('static', filename='image/govpic.jpg') }}" alt="">
+        <div class="feature-overlay"></div>
+        <div class="feature-content">
+            <h3>정부지원 정책</h3>
+            <span class="feature-btn">바로가기</span>
+        </div>
+    </a>
+</section>
+
+
+{% set district_map = {"eunpyeong": "은평구", "guro": "구로구"} %}
+
+<!-- =========================
+      전월세 매물
+========================= -->
+<section class="section-box container-fluid">
+
+    <div class="section-header">
+        <h3 class="section-title">전월세 매물</h3>
+        <a href="{{ url_for('predict.predict_search') }}" class="more-btn">더보기</a>
+    </div>
+
+    <div class="swiper myHouseSwiper">
+        <div class="swiper-wrapper">
+
+            {% if house_cards %}
+                {% for h in house_cards %}
+                <div class="swiper-slide">
+                    <div class="common-card">
+
+                        <h5 class="common-title">
+                            {{ h.building_name }}
+                            {% if h.house_type %} ({{ h.house_type }}){% endif %}
+                        </h5>
+
+                        <div class="common-body">
+                            <div class="info-block">
+                                <div class="info-title">위치</div>
+                                <div class="info-line">
+                                    {{ district_map.get(h.district, h.district) }}
+                                    {% if h.dong_name %} · {{ h.dong_name }}{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="info-block">
+                                <div class="info-title">기본정보</div>
+                                <div class="info-line">
+                                    {{ "%.1f"|format(h.area_m2) }}㎡
+                                    ({{ "%.1f"|format(h.area_m2/3.305785) }}평)
+                                    · {{ h.floor|int }}층
+                                </div>
+                            </div>
+
+                            <div class="info-block">
+                                <div class="info-title">예상 가격 (26년 1분기)</div>
+                                <div class="info-line">
+                                    보증금:
+                                    {% if h.deposit_26q1 %}
+                                        {{ "{:,.0f}만 원".format(h.deposit_26q1) }}
+                                    {% else %} 정보 없음 {% endif %}
+                                    {% if h.lease_type != "전세" and h.monthly_rent_26q1 %}
+                                        · 월세: {{ "{:,.0f}만 원".format(h.monthly_rent_26q1) }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{{ url_for('predict.predict_search',
+                                building_name=h.building_name,
+                                lat=h.latitude,
+                                lon=h.longitude,
+                                floor=h.floor,
+                                area=h.area_m2
+                        ) }}" class="common-btn">자세히 보기</a>
+
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>현재 표시할 매물이 없습니다.</p>
+            {% endif %}
+
+        </div>
+
+        <div class="swiper-button-prev house-prev"></div>
+        <div class="swiper-button-next house-next"></div>
+    </div>
+
+</section>
+
+
+<!-- =========================
+      정부지원 정책
+========================= -->
+<section class="section-box container-fluid">
+
+    <div class="section-header">
+        <h3 class="section-title">정부지원 정책</h3>
+        <a href="{{ url_for('support.support_search') }}" class="more-btn">더보기</a>
+    </div>
+
+    <div class="swiper myPolicySwiper">
+        <div class="swiper-wrapper">
+            {% for item in policy_cards %}
+            <div class="swiper-slide">
+                <div class="common-card">
+
+                    <h5 class="common-title">{{ item.title }}</h5>
+
+                    <div class="common-body">
+
+                        {% if item.source_type == "loan" and item.loan_target %}
+                        <div class="info-block">
+                            <div class="info-title">대출대상</div>
+                            {% for line in item.loan_target.split("\n") %}
+                            {% if line.strip() %}
+                            <div class="info-line">{{ line }}</div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {% if item.source_type == "policy" %}
+                            {% if item.policy_income %}
+                            <div class="info-block">
+                                <div class="info-title">소득기준</div>
+                                {% for line in item.policy_income.split("\n") %}
+                                <div class="info-line">{{ line }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if item.policy_asset %}
+                            <div class="info-block">
+                                <div class="info-title">자산기준</div>
+                                {% for line in item.policy_asset.split("\n") %}
+                                <div class="info-line">{{ line }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            {% if item.policy_age %}
+                            <div class="info-block">
+                                <div class="info-title">연령기준</div>
+                                {% for line in item.policy_age.split("\n") %}
+                                <div class="info-line">{{ line }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% endif %}
+
+                    </div>
+
+                    <a href="/support/{{ item.id }}?source=main" class="common-btn">
+                        자세히 보기
+                    </a>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="swiper-button-prev policy-prev"></div>
+        <div class="swiper-button-next policy-next"></div>
+    </div>
+
+</section>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    const houseSwiper = new Swiper(".myHouseSwiper", {
+        slidesPerView: 3,
+        slidesPerGroup: 3,
+        spaceBetween: 32,
+        navigation: {
+            nextEl: ".house-next",
+            prevEl: ".house-prev",
+        },
+        speed: 600,
+        grabCursor: true,
+    });
+
+    const policySwiper = new Swiper(".myPolicySwiper", {
+        slidesPerView: 3,
+        slidesPerGroup: 3,
+        spaceBetween: 32,
+        navigation: {
+            nextEl: ".policy-next",
+            prevEl: ".policy-prev",
+        },
+        speed: 600,
+        grabCursor: true,
+    });
+</script>
+
+{% endblock %}

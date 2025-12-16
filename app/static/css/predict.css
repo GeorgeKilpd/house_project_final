@@ -1,0 +1,426 @@
+/* =========================================
+   기본 스타일
+========================================= */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, "Noto Sans KR", sans-serif;
+  background-color: #f5f5f5;
+}
+
+#header-placeholder,
+#footer-placeholder {
+  height: 0;
+}
+
+/* =========================================
+   레이아웃: 네비 보정 + 지도 + 리스트
+========================================= */
+.page-wrapper {
+  display: flex;
+  height: calc(100vh - 70px);  /* 🔥 네비게이션바(70px) 제외 전체 화면 fit */
+  overflow: hidden;            /* 🔥 스크롤 제거 */
+  box-sizing: border-box;
+}
+
+.map-panel {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  height: 100%;                /* 🔥 부모 높이에 맞춤 */
+}
+
+#map {
+  width: 100%;
+  height: 100%;                /* 🔥 지도 영역 full fit */
+}
+
+/* =========================================
+   리스트 패널
+========================================= */
+.list-panel {
+  width: 420px;
+  max-width: 40%;
+  background: #fff;
+  border-left: 1px solid #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;                /* 🔥 부모 높이에 맞춤 */
+}
+
+.list-header {
+  padding: 16px 20px 10px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.list-header-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.list-header-sub {
+  font-size: 13px;
+  color: #777;
+}
+
+.list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 20px;
+  background: #f5f7fa;
+  border: 1px solid #d0d7e2;
+}
+
+.filter-chip.active {
+  background: #e8f3ff;
+  border-color: #3182f6;
+  color: #1b64da;
+  font-weight: 600;
+}
+
+.list-body {
+  flex: 1;
+  overflow-y: auto;      /* 🔥 전체 페이지 scroll 제거하고 리스트만 스크롤 */
+  padding: 10px 0;
+}
+
+/* =========================================
+   매물 카드
+========================================= */
+.property-card {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.property-card:hover {
+  background: #fafafa;
+  transform: translateY(-2px);
+}
+
+.property-card.active,
+.property-card.active:hover {
+  background-color: #e8f3ff !important;
+  box-shadow: 0 0 0 2px #1b64da inset !important;
+  transform: none !important;
+}
+
+.property-title-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.property-title {
+  font-size: 16px;
+  font-weight: 700;
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  border: 1px solid #ddd;
+}
+
+.badge-chip.type {
+  border-color: #ff8a3d;
+  color: #ff6b00;
+}
+
+.badge-chip.lease {
+  border-color: #3182f6;
+  color: #1b64da;
+}
+
+.property-price {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.property-meta {
+  font-size: 13px;
+  color: #666;
+}
+
+.property-meta span + span::before {
+  content: "•";
+  margin: 0 6px;
+  color: #ccc;
+}
+
+.property-address {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* =========================================
+   동 클러스터
+========================================= */
+.dong-cluster {
+  background: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  border: 1px solid #3182f6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dong-name {
+  font-weight: 700;
+  color: #1b64da;
+}
+
+.dong-count {
+  font-size: 11px;
+  color: #555;
+}
+
+/* =========================================
+   필터 패널 + 토글 버튼
+========================================= */
+
+.filter-toggle-btn {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 3000;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.filter-toggle-btn:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.filter-toggle-btn svg path {
+  stroke: #000;
+  transition: stroke 0.2s;
+}
+
+.filter-toggle-btn:hover svg path {
+  stroke: #1b64da;
+}
+
+.filter-container {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 2500;
+  width: 260px;
+  transition: all 0.35s cubic-bezier(.25,.8,.25,1);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.filter-container.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.filter-panel {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* =========================================
+   선택된 매물 팝업 패널
+========================================= */
+.property-detail-panel {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: 330px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  padding: 14px;
+  z-index: 9999;
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+}
+
+.detail-close-btn:hover {
+  color: #000;
+}
+
+/* =========================================
+   반응형
+========================================= */
+@media (max-width: 992px) {
+  .page-wrapper {
+    flex-direction: column;
+    height: auto;
+  }
+  .map-panel {
+    height: 50vh;
+  }
+  .list-panel {
+    width: 100%;
+    height: 50vh;
+  }
+  .filter-container {
+    width: calc(100% - 30px);
+  }
+}
+
+#filterPanel {
+  position: absolute;
+  top: 45px;
+  left: 0px;
+  z-index: 10;
+  background: white;
+  padding: 12px 14px;
+  border-radius: 10px;
+  width: 260px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.chart-score {
+    font-size: 12px;
+    color: #777;
+    text-align: right;
+    margin-top: 4px;
+    margin-right: 4px;
+}
+
+/* ============================
+   조회중 로딩 오버레이
+============================ */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.loading-text {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ======================================
+   전월세 지도 페이지 전용 네비게이션바
+====================================== */
+.predict-navbar {
+    background: linear-gradient(90deg, #0b1d33, #0f2a52);
+    height: 70px;
+    padding: 0 2rem !important;
+    border-bottom: none;
+}
+
+.predict-navbar .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.predict-navbar .nav-link:hover {
+    color: #f0f4ff !important;
+}
+
+.predict-navbar .navbar-brand img {
+    height: 40px;
+    filter: brightness(1.1);
+}
+
+.predict-navbar .navbar-toggler {
+    border-color: rgba(255,255,255,0.5);
+}
+
+.predict-navbar .navbar-toggler-icon {
+    filter: brightness(200%);
+}
+
+/* ======================================
+   네비게이션 메뉴 Hover 시 시그니처 컬러 적용
+====================================== */
+.predict-navbar .nav-link {
+    color: #fff !important;
+    transition: color 0.25s ease;   /* 부드러운 애니메이션 */
+}
+
+.predict-navbar .nav-link:hover {
+    color: #ff6b00 !important;      /* 시그니처 주황색 */
+}
+
+.predict-navbar .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.25s ease, transform 0.25s ease;  /* 🔥 transform 애니메이션 추가 */
+    display: inline-block;   /* transform 효과 적용 위해 필요 */
+}
+
+.predict-navbar .nav-link:hover {
+    color: #ff6b00 !important;   /* 시그니처 주황색 */
+    transform: translateY(-2px); /* 🔥 살짝 떠오르는 효과 */
+}

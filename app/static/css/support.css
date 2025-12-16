@@ -1,0 +1,346 @@
+:root {
+    --main-color: #385fab;
+    --point-color: #f1664a;
+    --gray-600: #444;
+    --gray-700: #333;
+    --light-gray: #EEF1F4;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #0f172a 0%, #f8fafc 100%);
+    color: #111827;
+}
+
+.support-page {
+    padding: 60px 0px 80px !important;
+}
+
+/* 히어로 영역 배경 이미지 */
+.hero-wrapper {
+    position: relative;
+    width: 100%;
+    height: 50vh; /* 높이 조절 가능 */
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                url('/static/image/support_ppl.png') no-repeat center 70%;
+    background-size: cover;
+    display: flex;
+    align-items: center; /* 세로 가운데 정렬 */
+    justify-content: flex-start;
+    padding-left: 10%; /* 좌측 여백 */
+    color: #fff;
+
+    /* ⭐⭐ Hero 아래 전체 여백 추가 (중요!) ⭐⭐ */
+    margin-bottom: 60px !important;
+}
+
+.support-page {
+    padding-left: 60px !important;
+    padding-right: 60px !important;
+}
+
+/* 히어로 컨텐츠 */
+.hero-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.hero-content p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+
+
+.hero-slide {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(180deg, #0f172a 0%, #f8fafc 100%);
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    transform: translateY(-50%);
+    color: #fff;
+    max-width: 500px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.hero-content p {
+    margin: 1rem 0;
+    font-size: 1.1rem;
+}
+
+/* 필터 박스 */
+.filter-area {
+    margin-bottom: 40px;
+}
+
+/* --------------------
+   체크박스 숨기기
+-------------------- */
+.btn-check {
+    display: none;
+}
+
+.district-toggle .btn-toggle {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #d1d1d6;
+    border-radius: 6px;
+    color: #333;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+
+/* --------------------
+   토글 버튼 기본 스타일
+-------------------- */
+.btn-toggle,
+.btn-outline-type {
+    display: inline-block;
+    padding: 24px 24px;
+    background: rgba(255,255,255,0.8);
+    border: 1px solid #d1d1d6;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* --------------------
+   체크 상태 (활성화)
+-------------------- */
+.btn-check:checked + .btn-toggle,
+.btn-check:checked + .btn-outline-type {
+    background: #385fab;
+    color: #fff;
+    border-color: #385fab;
+}
+
+/* 호버 시 변화 없도록 */
+.btn-outline-type:hover,
+.btn-toggle:hover {
+    background: rgba(255,255,255,0.9) !important;
+    border-color: #d1d1d6 !important;
+    color: #333 !important;
+}
+
+.btn-reset {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid #d1d1d6;
+    color: #555;
+    border-radius: 8px;
+    padding: 10px 0;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+}
+
+.btn-reset:hover { background: rgba(234,234,234,0.85); }
+
+/* ============================
+   카드 영역
+============================ */
+.sp-card {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 14px;
+    padding: 28px;
+    width: 380px;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 100%;
+    margin-right: 12px;
+}
+
+/* 청년 / 주택공급 배지 */
+.sp-badges .badge {
+    font-size: 0.95rem;       /* 기존 0.9rem → 0.95rem */
+    padding: 6px 12px;        /* 패딩 키워서 박스가 커지도록 */
+    border-radius: 10px;      /* 둥글기 조금 증가 */
+    margin-right: 10px;       /* 오른쪽 간격 조금 늘림 */
+}
+
+
+.sp-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.sp-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sp-subtitle {
+    font-size: 1rem;
+    color: var(--gray-600);
+    line-height: 1.4;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 청년 + 주택공급 버튼 스타일 - 호버/클릭 효과 제거 */
+.youth-btn {
+    background-color: #385fab; /* 기존 색 유지 */
+    color: #fff;
+    font-size: 1rem;           /* 글자 크기 조금 키움 */
+    padding: 14px 18px;        /* 버튼 자체 크기 키움 */
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03); /* 그림자 최소화 */
+    cursor: default;           /* 클릭 느낌 없애기 */
+}
+
+
+.badge-blue {
+    background-color: #EAF1FF;
+    color: var(--main-color);
+}
+
+.badge-orange {
+    background-color: #FFE7E0;
+    color: var(--point-color);
+}
+
+.sp-btn-detail {
+    background: transparent;          /* 배경 투명 */
+    color: #000;                      /* 글씨색 (원하는 색으로 변경 가능) */
+    border: 1px solid rgba(0,0,0,0.2);/* 연한 테두리 */
+
+    padding: 8px 14px;
+    border-radius: 8px;
+
+    box-shadow: 0 0 4px rgba(0,0,0,0.25); /* 최소한의 검은 그림자 */
+    transition: all 0.25s ease;
+}
+
+.sp-btn-detail:hover {
+    background-color: #264784;
+}
+
+/* ============================
+   Swiper 버튼
+============================ */
+.swiper {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.swiper-slide {
+    width: auto;
+    margin-right: 12px;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+    color: var(--main-color);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.swiper-button-prev { left: 5px; }
+.swiper-button-next { right: 5px; }
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+    font-size: 26px;
+}
+
+.sp-swiper-청년,
+.sp-swiper-신혼부부 {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.sp-swiper-청년 .swiper-wrapper,
+.sp-swiper-신혼부부 .swiper-wrapper {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.sp-slide {
+    width: auto !important;
+    flex: 0 0 auto;
+}
+
+/* ============================
+   반응형
+============================ */
+@media(max-width: 992px){
+    .sp-card {
+        width: 320px;  /* 너비 줄임 */
+        height: 260px; /* 높이 줄임 */
+        padding: 22px;
+    }
+    .sp-badges .badge { font-size: 0.9rem; padding: 5px 10px; }
+    .sp-badges .badge-orange { font-size: 0.95rem; padding: 6px 12px; }
+}
+
+@media(max-width: 768px){
+    .hero-content h1 { font-size: 2rem; }
+    .hero-content p { font-size: 1rem; }
+
+    .sp-card {
+        width: 280px;
+        height: 240px;
+        padding: 20px;
+    }
+    .sp-badges .badge { font-size: 0.85rem; padding: 4px 9px; }
+    .sp-badges .badge-orange { font-size: 0.9rem; padding: 5px 10px; }
+}
+
+@media(max-width: 576px){
+    .hero-content h1 { font-size: 1.6rem; }
+    .hero-content p { font-size: 0.95rem; }
+    .btn-outline-type { flex: 1 1 48%; margin-bottom: 6px; }
+
+    .sp-card {
+        width: 90%;
+        height: auto;   /* 높이 자동 */
+        padding: 18px;
+    }
+    .sp-badges .badge { font-size: 0.8rem; padding: 3px 8px; }
+    .sp-badges .badge-orange { font-size: 0.85rem; padding: 4px 9px; }
+
+}
+
+@media(max-width: 480px){
+    .filter-area { width: 100%; }
+    .filter-area select { width: 100%; }
+    .sp-card { width: 90%; margin-right: 10px; }
+}

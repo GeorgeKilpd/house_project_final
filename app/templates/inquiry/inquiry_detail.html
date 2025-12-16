@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% block title %}질문 상세 - AI 예측 시스템{% endblock %}
+{% block content %}
+<h2 style="text-align:center; color:#3f51b5; margin-bottom:1.5rem;">🗨️ {{ question.subject }}</h2>
+
+<!-- 질문 본문 -->
+<div style="background:#fff; border-radius:8px; box-shadow:0 0 5px rgba(0,0,0,0.1); padding:1.5rem; margin-bottom:2rem;">
+    <p style="white-space:pre-line; font-size:1rem; line-height:1.6;">{{ question.content }}</p>
+    <div style="text-align:right; color:#666; font-size:0.9rem; margin-top:1rem;">
+        작성일시: {{ question.create_date }}
+    </div>
+</div>
+
+<!-- 답변 목록 -->
+<h3 style="border-bottom:2px solid #3f51b5; padding-bottom:0.5rem; color:#3f51b5; margin-bottom:1rem;">
+    💬 {{ question.answer_set|length }}개의 답변
+</h3>
+
+{% if question.answer_set %}
+    {% for answer in question.answer_set %}
+    <div style="background:#fafafa; border-radius:8px; border:1px solid #ddd; padding:1rem; margin-bottom:1rem;">
+        <p style="white-space:pre-line; margin-bottom:0.5rem;">{{ answer.content }}</p>
+        <div style="text-align:right; color:#777; font-size:0.85rem;">
+            {{ answer.create_date }}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p style="color:#888;">아직 등록된 답변이 없습니다.</p>
+{% endif %}
+
+<!-- 답변 작성 폼 -->
+<h3 style="margin-top:2rem; color:#3f51b5;">✏️ 답변 작성하기</h3>
+
+<form action="{{ url_for('inquiry.q_answer', question_id=question.id) }}" method="post" style="margin-top:1rem;">
+    {{ form.csrf_token }}
+
+    {% for field, errors in form.errors.items() %}
+    <div style="background:#ffcdd2; color:#b71c1c; padding:10px; border-radius:6px; margin-bottom:10px;">
+        <strong>{{ form[field].label }}</strong>: {{ ', '.join(errors) }}
+    </div>
+    {% endfor %}
+
+    <div style="margin-bottom:1rem;">
+        <textarea name="content" id="content" rows="8"
+                  style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; resize:vertical; font-family:'Noto Sans KR', sans-serif;"></textarea>
+    </div>
+
+    <div style="text-align:right;">
+        <input type="submit" value="답변 등록"
+               style="background-color:#3f51b5; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">
+    </div>
+</form>
+
+{% endblock %}

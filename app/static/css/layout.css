@@ -1,0 +1,275 @@
+/* ============================================================
+   ▼ layout.html 전용: index 스타일 그대로 적용
+   - Bootstrap 영향 제거
+============================================================ */
+
+/* ============================
+   1) NAVBAR - index 스타일 유지
+============================ */
+nav.navbar {
+  background: transparent !important;
+  border-bottom: none !important;
+  padding: 1rem 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.navbar-brand img {
+  height: 100px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* ----------------------------
+      Nav 메뉴
+---------------------------- */
+.navbar-nav {
+  display: flex !important;
+  gap: 1rem !important;
+  align-items: center !important;
+  margin-left: auto !important; /* 오른쪽 정렬 */
+}
+
+.nav-item .nav-link {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  padding: 0.5rem 1rem !important;
+  text-decoration: none !important;
+  transition: 0.3s !important;
+  border-radius: 6px !important;
+  color: #fff !important; /* 기본 메뉴 색상 흰색 */
+}
+
+.nav-item .nav-link:hover {
+  color: #f1664a !important; /* 호버 시 주황색 */
+  transform: translateY(-2px) !important;
+}
+/* 햄버거 버튼 아이콘 흰색으로 변경 */
+.navbar-toggler {
+  border-color: rgba(255,255,255,0.6) !important;
+}
+
+.navbar-toggler-icon {
+  filter: invert(1) brightness(200%) !important;
+}
+/* ----------------------------
+   버튼 메뉴 스타일
+---------------------------- */
+
+/* Primary 버튼 스타일 */
+.nav-item .nav-link.btn-primary {
+  background-color: #385fab !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.nav-item .nav-link.btn-primary:hover {
+  background-color: #f1664a !important;
+}
+
+/* Outline 버튼 스타일 */
+.nav-item .nav-link.btn-outline {
+  border: 1px solid #fff !important;
+  color: #fff !important;
+  background: transparent !important;
+}
+
+.nav-item .nav-link.btn-outline:hover {
+  color: #f1664a !important;
+  border-color: #f1664a !important;
+}
+
+/* ============================
+   2) 로고 슬라이드
+============================ */
+.logo-bar {
+  padding: 20px 0 !important;
+  background: #ffffff !important; /* ← 완전 흰색 */
+  backdrop-filter: none !important; /* 흐림 효과 제거 */
+}
+
+
+.logo-slider {
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+.logo-track {
+  display: flex !important;
+  align-items: center !important;
+  width: calc(210px * 24) !important;
+  animation: slideLoop 40s linear infinite !important;
+  will-change: transform;
+}
+
+@keyframes slideLoop {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-210px * 12)); }
+}
+
+.logo {
+  width: 150px !important;
+  height: 80px !important;
+  object-fit: contain !important;
+  margin: 0 30px !important;
+  opacity: 0.85 !important;
+  transition: transform 0.25s, opacity 0.25s !important;
+}
+
+.logo:hover {
+  opacity: 1 !important;
+  transform: scale(1.05) !important;
+}
+
+/* ============================
+   3) FOOTER - index 톤 적용 + 정렬
+============================ */
+.footer-section {
+  background: rgba(15,23,42,0.95) !important;
+  padding: 35px 0 !important;
+  color: #f8fafc !important;
+}
+
+.footer-flex {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 2rem !important;        /* 컬럼간 간격 늘림 */
+  flex-wrap: nowrap !important; /* 한 줄로 강제 */
+}
+
+.footer-left {
+  flex: 0 0 32% !important;
+  max-width: 32% !important;
+  text-align: left;
+}
+
+.footer-center {
+  flex: 0 0 36% !important;
+  max-width: 36% !important;
+  text-align: center;
+  font-size: 0.85rem !important; /* 폰트 크기 줄임 */
+}
+.footer-center .footer-bottom {
+  font-size: 0.75rem !important; /* 원하는 크기로 조절 */
+}
+
+.footer-right {
+  flex: 0 0 32% !important;
+  max-width: 32% !important;
+  text-align: right;
+  position: relative; /* 드롭다운 기준 */
+}
+
+/* 로고 크기 키우기 */
+.footer-left img {
+  height: 80px !important; /* 원래 60px → 80px */
+  width: auto !important;
+}
+.footer-top,
+.footer-bottom,
+.footer-menu a {
+  color: #f8fafc !important;
+}
+
+.footer-menu a {
+  margin: 0 10px !important;
+  font-size: 10px !important;
+  text-decoration: none !important;
+}
+
+.footer-menu a:hover {
+  color: #f1664a !important;
+  text-decoration: underline !important;
+}
+
+/* ============================
+   4) FOOTER DROPDOWN
+============================ */
+.footer-dropdown-btn {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: #f8fafc !important;
+  cursor: pointer;
+}
+
+.footer-right {
+  position: relative; /* 자식 .footer-dropdown-list 기준 위치 */
+}
+
+.footer-dropdown-list {
+  display: none;
+  position: absolute;
+  right: 0;        /* 버튼 오른쪽 끝 맞춤 */
+  bottom: 100%;    /* 버튼 위쪽 기준 */
+  margin-bottom: 5px; /* 버튼과 간격 */
+  background: rgba(15,23,42,0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 10px;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.footer-dropdown-list.show {
+  display: block;
+}
+
+.footer-dropdown-list a {
+  display: block;
+  color: #f8fafc !important;
+  text-decoration: none !important;
+  padding: 5px 10px;
+}
+
+.footer-dropdown-list a:hover {
+  color: #f1664a !important;
+}
+
+.footer-dropdown-list.show {
+  display: block;
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 991px) {
+  .footer-left, .footer-center, .footer-right {
+    width: 33% !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .footer-flex {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+  .footer-left, .footer-center, .footer-right {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+/* ============================
+   4) 전체 배경 index 톤
+============================ */
+body {
+  background: linear-gradient(180deg, #0f172a 0%, #f8fafc 100%) !important;
+  color: #fff !important;
+  font-family: 'Noto Sans KR', sans-serif !important;
+}
+
+/* ============================
+   반응형: 로고 크기 조정
+============================ */
+@media (max-width: 768px) {
+  .navbar-brand img {
+    width: 160px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand img {
+    width: 130px !important;
+  }
+}

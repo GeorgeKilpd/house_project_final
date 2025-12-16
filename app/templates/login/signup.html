@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- 상단 간격 -->
+<div class="container mt-5 pt-5 mb-5">
+
+  <!-- 제목 + 밑줄 -->
+  <div class="mb-5" style="width:60%; margin:0 auto;">
+    <h2 class="fw-bold" style="color:#FFFFFF; text-align:left;">회원가입</h2>
+    <hr style="border:2px solid #FFFFFF; margin-left:0;">
+  </div>
+
+  <!-- 회원가입 폼 -->
+  <div class="d-flex justify-content-center">
+    <form method="POST" style="width:420px;">
+      {{ form.hidden_tag() }}
+
+      <!-- 아이디 -->
+      <div class="mb-4">
+        {{ form.username.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.username(class="form-control form-underline", placeholder="아이디 입력") }}
+      </div>
+
+      <!-- 비밀번호 -->
+      <div class="mb-4">
+        {{ form.password.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.password(class="form-control form-underline", placeholder="비밀번호 입력") }}
+      </div>
+
+      <!-- 비밀번호 확인 -->
+      <div class="mb-4">
+        {{ form.confirm_password.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.confirm_password(class="form-control form-underline", placeholder="비밀번호 확인") }}
+      </div>
+
+      <!-- 이름 -->
+      <div class="mb-4">
+        {{ form.name.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.name(class="form-control form-underline", placeholder="이름") }}
+      </div>
+
+      <!-- 휴대폰번호 -->
+      <div class="mb-4">
+        {{ form.phone.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.phone(class="form-control form-underline", placeholder="휴대폰 번호") }}
+      </div>
+
+      <!-- 이메일 -->
+      <div class="mb-4">
+        {{ form.email.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.email(class="form-control form-underline", placeholder="이메일") }}
+      </div>
+
+      <!-- 생년월일 -->
+      <div class="mb-5">
+        {{ form.birth.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.birth(class="form-control form-underline", type="date", max=current_date) }}
+      </div>
+
+      <!-- 회원가입 버튼 -->
+      <div class="d-grid mb-4">
+        <button type="submit" class="btn fw-bold"
+                style="background-color:#f2664a; color:white; border-radius:12px; padding:10px 0;">
+          회원가입
+        </button>
+      </div>
+
+      <!-- 하단 링크 -->
+      <div class="d-flex justify-content-between">
+        <a href="#" class="small" style="color:#FFFFFF; text-decoration:none;">아이디 / 비밀번호 찾기</a>
+        <a href="{{ url_for('login.login') }}" class="small" style="color:#FFFFFF; text-decoration:none;">로그인</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_css %}
+<style>
+  /* 밑줄 스타일 입력칸 */
+  .form-underline {
+    border: none;
+    border-bottom: 2px solid #FFFFFF;
+    border-radius: 0;
+    background-color: transparent;
+    color: #FFFFFF;
+    padding: 8px 0;
+  }
+
+  .form-underline:focus {
+    box-shadow: none;
+    border-bottom: 2px solid #f2664a;
+    background-color: transparent;
+    color: #FFFFFF;
+  }
+
+  ::placeholder {
+    color: rgba(255,255,255,0.6);
+  }
+</style>
+{% endblock %}

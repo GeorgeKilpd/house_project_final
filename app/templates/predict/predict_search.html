@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>전·월세 매물 지도</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 예측 전용 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/predict.css') }}">
+
+    <!-- Kakao Maps API -->
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=1fde25c875a950c6021e15962de33bce&autoload=false"></script>
+
+    <!-- Chart.js (예측 차트용) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg predict-navbar">
+    <div class="container-fluid px-4">
+
+        <a class="navbar-brand" href="{{ url_for('index.index') }}">
+            <img src="{{ url_for('static', filename='image/logo2.png') }}"
+                 alt="청년 주거 솔루션 로고"
+                 style="height:40px; width:auto;">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="topNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item ms-3"><a class="nav-link" href="{{ url_for('predict.predict_search') }}">전월세 예측</a>
+                </li>
+                <li class="nav-item ms-3"><a class="nav-link" href="{{ url_for('support.support_search') }}">정부지원</a>
+                </li>
+                <li class="nav-item ms-3"><a class="nav-link" href="{{ url_for('login.login') }}">로그인</a></li>
+                <li class="nav-item ms-3"><a class="nav-link" href="{{ url_for('login.signup') }}">회원가입</a></li>
+            </ul>
+        </div>
+
+    </div>
+</nav>
+
+<div id="header-placeholder"></div>
+
+<div class="page-wrapper">
+
+    <!-- 지도 -->
+    <div class="map-panel">
+
+        <!-- 🔵 필터 토글 버튼 (슬라이드 버튼) -->
+        <button id="filterToggleBtn" class="filter-toggle-btn">
+            <svg width="26" height="26" viewBox="0 0 24 24">
+                <path d="M3 6h18M3 12h18M3 18h18"
+                      stroke="#000"
+                      stroke-width="2"
+                      stroke-linecap="round"/>
+            </svg>
+        </button>
+
+        <!-- 🔵 슬라이드 컨테이너 (필터Panel을 감싸는 외곽) -->
+        <div id="filterContainer" class="filter-container">
+
+            <!-- 기존 검색 필터 -->
+            <div id="filterPanel" class="filter-panel">
+                <div class="filter-grid">
+
+                    <!-- 지역 -->
+                    <div class="filter-item">
+                        <label>지역</label>
+                        <select id="filterGu" class="form-select form-select-sm">
+                            <option value="eunpyeong" {% if init_filter.gu=="eunpyeong" %}selected{% endif %}>은평구
+                            </option>
+                            <option value="guro" {% if init_filter.gu=="guro" %}selected{% endif %}>구로구</option>
+                        </select>
+                    </div>
+
+                    <!-- 주택유형 -->
+                    <div class="filter-item">
+                        <label>주택유형</label>
+                        <select id="filterHouseType" class="form-select form-select-sm">
+                            <option value="오피스텔" {% if init_filter.house_type=="오피스텔" %}selected{% endif %}>오피스텔
+                            </option>
+                            <option value="빌라" {% if init_filter.house_type=="빌라" %}selected{% endif %}>빌라</option>
+                        </select>
+                    </div>
+
+                    <!-- 거래유형 -->
+                    <div class="filter-item">
+                        <label>거래유형</label>
+                        <select id="filterTradeType" class="form-select form-select-sm">
+                            <option value="전세" {% if init_filter.lease_type=="전세" %}selected{% endif %}>전세</option>
+                            <option value="월세" {% if init_filter.lease_type=="월세" %}selected{% endif %}>월세</option>
+                        </select>
+                    </div>
+
+                    <!-- 면적 -->
+                    <div class="filter-item">
+                        <label>면적</label>
+                        <select id="filterArea" class="form-select form-select-sm">
+                            <option value="0-9" {% if init_filter.area=="0-9" %}selected{% endif %}>10평 미만</option>
+                            <option value="10-19" {% if init_filter.area=="10-19" %}selected{% endif %}>10평대</option>
+                            <option value="20-29" {% if init_filter.area=="20-29" %}selected{% endif %}>20평대</option>
+                            <option value="30-999" {% if init_filter.area=="30-999" %}selected{% endif %}>기타</option>
+                        </select>
+                    </div>
+
+                    <!-- 층수 -->
+                    <div class="filter-item">
+                        <label>층수</label>
+                        <select id="filterFloor" class="form-select form-select-sm">
+                            <option value="all" {% if init_filter.floor=="all" %}selected{% endif %}>전체</option>
+                            <option value="basement" {% if init_filter.floor=="basement" %}selected{% endif %}>지하
+                            </option>
+                            <option value="low" {% if init_filter.floor=="low" %}selected{% endif %}>저층</option>
+                            <option value="mid" {% if init_filter.floor=="mid" %}selected{% endif %}>중층</option>
+                            <option value="high" {% if init_filter.floor=="high" %}selected{% endif %}>고층</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-primary w-100 btn-sm mt-2" id="applyFilter">검색하기</button>
+            </div>
+
+        </div>
+
+        <!-- 카카오 지도 -->
+        <div id="map"></div>
+
+        <!-- 🟦 예측 팝업 패널 (지도 위에 뜨는 창) -->
+        <div id="detailPanel" class="property-detail-panel" style="display:none;">
+            <div class="detail-header">
+                <div class="detail-title-row">
+                    <div id="detailTitle" class="detail-title"></div>
+                    <button type="button" id="detailCloseBtn" class="detail-close-btn">&times;</button>
+                </div>
+                <div class="detail-summary">
+                    <div id="detailRecentInfo" class="detail-recent-info"></div>
+                    <div id="detailRecentPrice" class="detail-recent-price"></div>
+                </div>
+            </div>
+
+            <div class="detail-body">
+                <div class="detail-year-row">
+                    <label for="detailYearSelect" class="detail-year-label">예상 연도</label>
+                    <select id="detailYearSelect" class="form-select form-select-sm detail-year-select">
+                        <option value="2025">2025년</option>
+                        <option value="2026" selected>2026년</option>
+                        <option value="2027">2027년</option>
+                        <option value="2028">2028년</option>
+                        <option value="2029">2029년</option>
+                        <option value="2030">2030년</option>
+                    </select>
+                </div>
+
+                <div class="detail-charts">
+                    <div class="chart-block">
+                        <h6 class="chart-title">보증금 예측</h6>
+                        <div class="chart-wrapper">
+                            <canvas id="depositChart"></canvas>
+                        </div>
+                        <div id="depositScore" class="chart-score"></div>
+                    </div>
+
+                    <div class="chart-block" id="monthlyChartBlock">
+                        <h6 class="chart-title">월세 예측</h6>
+                        <div class="chart-wrapper">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                        <div id="monthlyScore" class="chart-score"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 🟦 예측 팝업 끝 -->
+
+    </div>
+
+    <!-- 리스트 -->
+    <aside class="list-panel">
+
+        <div class="list-header">
+            <div class="list-header-title">
+                {{ "은평구" if init_filter.gu == "eunpyeong" else "구로구" }}
+                {{ init_filter.lease_type }} {{ init_filter.house_type }} 매물
+            </div>
+            <div class="list-header-sub">
+                총 <strong id="listCount">{{ items|length }}</strong>개 매물
+            </div>
+        </div>
+
+        <!-- 정렬선택 (추천순 제거) -->
+        <div class="list-toolbar">
+            <div class="toolbar-filters">
+
+                <span class="filter-chip active">
+                    {% if init_filter.area == "10-19" %}
+                        10평대
+                    {% elif init_filter.area == "20-29" %}
+                        20평대
+                    {% elif init_filter.area == "0-9" %}
+                        10평 미만
+                    {% else %}
+                        기타
+                    {% endif %}
+                </span>
+
+                {% if init_filter.floor == "low" %}
+                <span class="filter-chip active">1~4층</span>
+                {% elif init_filter.floor == "mid" %}
+                <span class="filter-chip active">5~10층</span>
+                {% elif init_filter.floor == "high" %}
+                <span class="filter-chip active">11층 이상</span>
+                {% elif init_filter.floor == "basement" %}
+                <span class="filter-chip active">지하층</span>
+                {% else %}
+                <span class="filter-chip active">전체층</span>
+                {% endif %}
+
+                <span class="filter-chip">{{ init_filter.house_type }}</span>
+                <span class="filter-chip">{{ init_filter.lease_type }}</span>
+            </div>
+
+            <div class="toolbar-sort">
+                <select id="sortSelect" class="form-select form-select-sm">
+                    <option value="deposit_desc">보증금 높은순</option>
+                    <option value="deposit_asc">보증금 낮은순</option>
+                    <option value="monthly_desc">월세 높은순</option>
+                    <option value="monthly_asc">월세 낮은순</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="list-body" id="listBody"></div>
+    </aside>
+
+</div>
+
+<div id="footer-placeholder"></div>
+
+<!-- 필터 적용 -->
+<script>
+    document.getElementById("applyFilter").addEventListener("click", () => {
+        // 🔵 로딩 오버레이 표시
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+            overlay.style.display = "flex";
+        }
+
+        // 🔵 필터 값 읽기
+        const gu = document.getElementById("filterGu").value;
+        const houseType = document.getElementById("filterHouseType").value;
+        const leaseType = document.getElementById("filterTradeType").value;
+        const area = document.getElementById("filterArea").value;
+        const floor = document.getElementById("filterFloor").value;
+
+        // 🔵 페이지 이동 (서버 검색 요청)
+        location.href =
+            `/predict/search?gu=${gu}&house_type=${houseType}&lease_type=${leaseType}&area=${area}&floor=${floor}`;
+    });
+
+</script>
+
+<!-- 서버 데이터 -->
+<script>
+    const ALL_PROPERTIES = [
+        {% for item in items %}
+        {
+            idx: {{ loop.index0 }},  // 🔑 고유 인덱스 (마커/리스트 연동용)
+            lat: {{ item.latitude or 'null' }},
+            lng: {{ item.longitude or 'null' }},
+            building_name: {{ item.building_name|tojson }},
+            dong_name: {{ item.dong_name|tojson }},
+            district: {{ item.district|tojson }},
+            floor: {{ item.floor|tojson }},
+            area_p: {{ item.area_p|tojson }},
+            house_type: {{ item.house_type|tojson }},
+            lease_type: {{ item.lease_type|tojson }},
+            recent_yq: {{ item.recent_yq|tojson }},
+            jibun_address: {{ item.jibun_address|tojson }},
+            recent_deposit: {{ item.recent_deposit or 'null' }},
+            recent_monthly: {{ item.recent_monthly or 'null' }},
+
+            deposit_25q1: {{ item.deposit_25q1 or 'null' }},
+            deposit_25q2: {{ item.deposit_25q2 or 'null' }},
+            deposit_25q3: {{ item.deposit_25q3 or 'null' }},
+            deposit_25q4: {{ item.deposit_25q4 or 'null' }},
+            deposit_26q1: {{ item.deposit_26q1 or 'null' }},
+            deposit_26q2: {{ item.deposit_26q2 or 'null' }},
+            deposit_26q3: {{ item.deposit_26q3 or 'null' }},
+            deposit_26q4: {{ item.deposit_26q4 or 'null' }},
+            deposit_27q1: {{ item.deposit_27q1 or 'null' }},
+            deposit_27q2: {{ item.deposit_27q2 or 'null' }},
+            deposit_27q3: {{ item.deposit_27q3 or 'null' }},
+            deposit_27q4: {{ item.deposit_27q4 or 'null' }},
+            deposit_28q1: {{ item.deposit_28q1 or 'null' }},
+            deposit_28q2: {{ item.deposit_28q2 or 'null' }},
+            deposit_28q3: {{ item.deposit_28q3 or 'null' }},
+            deposit_28q4: {{ item.deposit_28q4 or 'null' }},
+            deposit_29q1: {{ item.deposit_29q1 or 'null' }},
+            deposit_29q2: {{ item.deposit_29q2 or 'null' }},
+            deposit_29q3: {{ item.deposit_29q3 or 'null' }},
+            deposit_29q4: {{ item.deposit_29q4 or 'null' }},
+            deposit_30q1: {{ item.deposit_30q1 or 'null' }},
+            deposit_30q2: {{ item.deposit_30q2 or 'null' }},
+            deposit_30q3: {{ item.deposit_30q3 or 'null' }},
+            deposit_30q4: {{ item.deposit_30q4 or 'null' }},
+
+            monthly_rent_25q1: {{ item.monthly_rent_25q1 or 'null' }},
+            monthly_rent_25q2: {{ item.monthly_rent_25q2 or 'null' }},
+            monthly_rent_25q3: {{ item.monthly_rent_25q3 or 'null' }},
+            monthly_rent_25q4: {{ item.monthly_rent_25q4 or 'null' }},
+            monthly_rent_26q1: {{ item.monthly_rent_26q1 or 'null' }},
+            monthly_rent_26q2: {{ item.monthly_rent_26q2 or 'null' }},
+            monthly_rent_26q3: {{ item.monthly_rent_26q3 or 'null' }},
+            monthly_rent_26q4: {{ item.monthly_rent_26q4 or 'null' }},
+            monthly_rent_27q1: {{ item.monthly_rent_27q1 or 'null' }},
+            monthly_rent_27q2: {{ item.monthly_rent_27q2 or 'null' }},
+            monthly_rent_27q3: {{ item.monthly_rent_27q3 or 'null' }},
+            monthly_rent_27q4: {{ item.monthly_rent_27q4 or 'null' }},
+            monthly_rent_28q1: {{ item.monthly_rent_28q1 or 'null' }},
+            monthly_rent_28q2: {{ item.monthly_rent_28q2 or 'null' }},
+            monthly_rent_28q3: {{ item.monthly_rent_28q3 or 'null' }},
+            monthly_rent_28q4: {{ item.monthly_rent_28q4 or 'null' }},
+            monthly_rent_29q1: {{ item.monthly_rent_29q1 or 'null' }},
+            monthly_rent_29q2: {{ item.monthly_rent_29q2 or 'null' }},
+            monthly_rent_29q3: {{ item.monthly_rent_29q3 or 'null' }},
+            monthly_rent_29q4: {{ item.monthly_rent_29q4 or 'null' }},
+            monthly_rent_30q1: {{ item.monthly_rent_30q1 or 'null' }},
+            monthly_rent_30q2: {{ item.monthly_rent_30q2 or 'null' }},
+            monthly_rent_30q3: {{ item.monthly_rent_30q3 or 'null' }},
+            monthly_rent_30q4: {{ item.monthly_rent_30q4 or 'null' }}
+
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+
+<!-- 지도 전체로직 -->
+<script>
+    kakao.maps.load(function () {
+
+        /*************************************************
+         * 공용 상태 변수
+         *************************************************/
+        const valid = ALL_PROPERTIES.filter(p => p.lat && p.lng);
+
+        // 선택 상태
+        let selectedIdx = null;
+        let selectedMarker = null;
+
+        // 인덱스로 마커/카드 찾기
+        const markerByIdx = {};
+        const cardByIdx = {};
+
+        // 줌 이벤트에서 한 번은 선택 유지하도록 하는 플래그
+        let suppressClearOnNextZoom = false;
+
+        /*************************************************
+         * 지도 초기화
+         *************************************************/
+        const avgLat = valid.reduce((s, p) => s + p.lat, 0) / valid.length;
+        const avgLng = valid.reduce((s, p) => s + p.lng, 0) / valid.length;
+
+        const map = new kakao.maps.Map(document.getElementById("map"), {
+            center: new kakao.maps.LatLng(avgLat, avgLng),
+            level: 6
+        });
+
+        /*************************************************
+         * 팝업/차트 관련 DOM & 상태
+         *************************************************/
+        const detailPanel = document.getElementById("detailPanel");
+        const detailTitle = document.getElementById("detailTitle");
+        const detailRecentInfo = document.getElementById("detailRecentInfo");
+        const detailRecentPrice = document.getElementById("detailRecentPrice");
+        const detailYearSelect = document.getElementById("detailYearSelect");
+        const depositChartCanvas = document.getElementById("depositChart");
+        const monthlyChartCanvas = document.getElementById("monthlyChart");
+        const monthlyChartBlock = document.getElementById("monthlyChartBlock");
+
+        let depositChartInstance = null;
+        let monthlyChartInstance = null;
+
+        function formatNumber(n) {
+            if (n === null || n === undefined || n === "" || isNaN(Number(n))) return "-";
+            return Number(n).toLocaleString("ko-KR");
+        }
+
+        /*************************************************
+         * 팝업 닫기
+         *************************************************/
+        function closeDetailPanel() {
+            if (!detailPanel) return;
+            detailPanel.style.display = "none";
+
+            if (depositChartInstance) {
+                depositChartInstance.destroy();
+                depositChartInstance = null;
+            }
+            if (monthlyChartInstance) {
+                monthlyChartInstance.destroy();
+                monthlyChartInstance = null;
+            }
+        }
+
+        // X 버튼
+        const detailCloseBtn = document.getElementById("detailCloseBtn");
+        if (detailCloseBtn) {
+            detailCloseBtn.addEventListener("click", () => {
+                closeDetailPanel();
+                // 선택도 같이 해제
+                clearSelection();
+            });
+        }
+
+        /*************************************************
+         * 연도별 차트 업데이트
+         *************************************************/
+        function updateCharts(p) {
+            if (!depositChartCanvas || !detailYearSelect) return;
+
+            const yearStr = detailYearSelect.value || "2026";
+            const yearSuffix = yearStr.slice(2); // "26" 형태
+
+            const labels = ["1분기", "2분기", "3분기", "4분기"];
+            const depositValues = [];
+            const monthlyValues = [];
+
+            for (let q = 1; q <= 4; q++) {
+                const dqKey = `deposit_${yearSuffix}q${q}`;
+                const mqKey = `monthly_rent_${yearSuffix}q${q}`;
+
+                let dv = Number(p[dqKey]);
+                if (!isFinite(dv)) dv = null;
+                depositValues.push(dv);
+
+                let mv = Number(p[mqKey]);
+                if (!isFinite(mv)) mv = null;
+                monthlyValues.push(mv);
+            }
+
+            // 기존 차트 제거
+            if (depositChartInstance) {
+                depositChartInstance.destroy();
+            }
+
+            /**********************************************
+             * 보증금 차트 (전세 / 월세 모두 공통)
+             **********************************************/
+            depositChartInstance = new Chart(depositChartCanvas.getContext("2d"), {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${yearStr}년 분기별 보증금`,
+                        data: depositValues,
+                        borderColor: "#1b64da",
+                        pointBackgroundColor: "#1b64da",
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: Math.min(...depositValues) * 0.97,
+                            max: Math.max(...depositValues) * 1.03,
+                            ticks: {
+                                callback: value => value.toLocaleString("ko-KR")
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            /**********************************************
+             * 월세 차트 (월세일 때만 표시)
+             **********************************************/
+            if (p.lease_type === "월세") {
+                if (monthlyChartCanvas) {
+                    if (monthlyChartInstance) monthlyChartInstance.destroy();
+                }
+
+                monthlyChartInstance = new Chart(monthlyChartCanvas.getContext("2d"), {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${yearStr}년 분기별 월세`,
+                            data: monthlyValues,
+                            borderColor: "#ff6b00",
+                            pointBackgroundColor: "#ff6b00",
+                            tension: 0.2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: Math.min(...monthlyValues) * 0.95,
+                                max: Math.max(...monthlyValues) * 1.05,
+                                ticks: {
+                                    callback: value => value.toLocaleString("ko-KR")
+                                }
+                            }
+                        }
+                    }
+                });
+
+                if (monthlyChartBlock) monthlyChartBlock.style.display = "block";
+            } else {
+                // 전세: 월세 차트 숨김
+                if (monthlyChartBlock) monthlyChartBlock.style.display = "none";
+                if (monthlyChartInstance) {
+                    monthlyChartInstance.destroy();
+                    monthlyChartInstance = null;
+                }
+            }
+
+
+            /**********************************************
+             * 🔥 여기서 모델 정확도 표시
+             **********************************************/
+            const depositScoreDiv = document.getElementById("depositScore");
+            const monthlyScoreDiv = document.getElementById("monthlyScore");
+
+            if (p.lease_type === "전세") {
+                // 전세 보증금 모델 정확도
+                if (depositScoreDiv) depositScoreDiv.textContent = "예측 정확도: 88%";
+                if (monthlyScoreDiv) monthlyScoreDiv.textContent = "";
+            }
+
+            else if (p.lease_type === "월세") {
+                // 월세 모델의 보증금 & 월세 모두 29%
+                if (depositScoreDiv) depositScoreDiv.textContent = "예측 정확도: 29%";
+                if (monthlyScoreDiv) monthlyScoreDiv.textContent = "예측 정확도: 29%";
+            }
+        }
+
+
+        // 연도 선택 변경 시 차트 갱신
+        if (detailYearSelect) {
+            detailYearSelect.addEventListener("change", () => {
+                if (selectedIdx !== null) {
+                    const p = valid.find(x => x.idx === selectedIdx);
+                    if (p) updateCharts(p);
+                }
+            });
+        }
+
+        /*************************************************
+         * 팝업 열기
+         *************************************************/
+        function openDetailPanel(p) {
+            if (!detailPanel) return;
+
+            detailTitle.textContent = p.building_name || "";
+            detailRecentInfo.textContent = p.recent_yq || "최근 계약 정보 없음";
+
+            let priceText = "";
+            if (p.lease_type === "전세") {
+                if (p.recent_deposit) {
+                    priceText = `전세 ${formatNumber(p.recent_deposit)}만원`;
+                } else {
+                    priceText = "전세 예측 금액";
+                }
+            } else if (p.lease_type === "월세") {
+                if (p.recent_deposit || p.recent_monthly) {
+                    priceText = `보증금 ${formatNumber(p.recent_deposit)} / 월세 ${formatNumber(p.recent_monthly)}만원`;
+                } else {
+                    priceText = "월세 예측 금액";
+                }
+            }
+            detailRecentPrice.textContent = priceText;
+
+            // 기본 연도 2026
+            if (detailYearSelect && !detailYearSelect.value) {
+                detailYearSelect.value = "2026";
+            }
+
+            updateCharts(p);
+            detailPanel.style.display = "block";
+        }
+
+        /*************************************************
+         * 마커 이미지 (기본 / 선택)
+         *************************************************/
+        const markerDefaultImage = null;
+
+        const markerSelectedImage = new kakao.maps.MarkerImage(
+            "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png",
+            new kakao.maps.Size(24, 35),
+            {offset: new kakao.maps.Point(12, 35)}
+        );
+
+        /*************************************************
+         * 동 단위 클러스터 생성
+         *************************************************/
+        const dongGroups = {};
+
+        valid.forEach(p => {
+            const d = p.dong_name || "기타";
+            if (!dongGroups[d]) {
+                dongGroups[d] = { items: [], sumLat: 0, sumLng: 0 };
+            }
+            dongGroups[d].items.push(p);
+            dongGroups[d].sumLat += p.lat;
+            dongGroups[d].sumLng += p.lng;
+        });
+
+        const dongOverlays = [];
+
+        function createDongClusters() {
+            for (let d in dongGroups) {
+                const g = dongGroups[d];
+                const lat = g.sumLat / g.items.length;
+                const lng = g.sumLng / g.items.length;
+
+                const overlay = new kakao.maps.CustomOverlay({
+                    position: new kakao.maps.LatLng(lat, lng),
+                    yAnchor: 1,
+                    map: map,
+                    content: `
+                        <div class="dong-cluster" onclick="zoomToDong('${d}')">
+                            <div class="dong-name">${d}</div>
+                            <div class="dong-count">${g.items.length}가구</div>
+                        </div>
+                    `
+                });
+                dongOverlays.push(overlay);
+            }
+        }
+
+        window.zoomToDong = (dong) => {
+            const g = dongGroups[dong];
+            const lat = g.sumLat / g.items.length;
+            const lng = g.sumLng / g.items.length;
+
+            suppressClearOnNextZoom = true;  // 이 줌에서는 선택 유지
+            map.setLevel(4);
+            map.panTo(new kakao.maps.LatLng(lat, lng));
+        };
+
+        /*************************************************
+         * 개별 마커 생성 + 클릭 이벤트 (리스트 연동)
+         *************************************************/
+        const markers = [];
+
+        valid.forEach(p => {
+            const marker = new kakao.maps.Marker({
+                position: new kakao.maps.LatLng(p.lat, p.lng),
+                map: null,
+                image: markerDefaultImage
+            });
+            marker.data = p;
+            markerByIdx[p.idx] = marker;
+            markers.push(marker);
+
+            kakao.maps.event.addListener(marker, "click", function () {
+
+                const pos = marker.getPosition();
+
+                // 지도 이동
+                map.panTo(pos);
+                setTimeout(() => map.setLevel(2), 200);
+
+                // 이동 후 줌인
+                setTimeout(() => {
+                    map.setLevel(2);   // 숫자 작을수록 확대
+                }, 200);
+
+                selectByIdx(p.idx, false);
+            });
+        });
+
+        /*************************************************
+         * 선택 상태 초기화
+         *************************************************/
+        function clearSelection() {
+            // 마커 강조 해제
+            if (selectedMarker) {
+                selectedMarker.setImage(markerDefaultImage);
+                selectedMarker = null;
+            }
+            selectedIdx = null;
+
+            // 카드 강조 해제
+            Object.values(cardByIdx).forEach(card => {
+                card.classList.remove("active");
+            });
+
+            // 팝업도 같이 닫기
+            closeDetailPanel();
+        }
+
+        /*************************************************
+         * 인덱스로 선택 처리 (마커/리스트 연동)
+         * fromList=true 이면 리스트에서 선택한 것
+         *************************************************/
+        function selectByIdx(idx, fromList) {
+            const p = valid.find(x => x.idx === idx);
+            if (!p) return;
+
+            // 이전 선택 해제
+            clearSelection();
+
+            // 마커 강조
+            const marker = markerByIdx[idx];
+            if (marker) {
+                marker.setImage(markerSelectedImage);
+                selectedMarker = marker;
+                selectedIdx = idx;
+            }
+
+            // 리스트 카드 강조 + 스크롤
+            const card = cardByIdx[idx];
+            if (card) {
+                card.classList.add("active");
+                card.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+
+            // 리스트에서 선택했을 때 지도 이동/줌 처리
+            if (fromList && marker) {
+                suppressClearOnNextZoom = true;   // 🚀 리스트 클릭으로 인한 줌 → 선택 해제 금지
+
+                const pos = marker.getPosition();
+                map.panTo(pos);
+
+                setTimeout(() => {
+                    suppressClearOnNextZoom = true; // 🚀 setLevel 발생 전 안전하게 한 번 더
+                    map.setLevel(2);
+                }, 200);
+
+                setTimeout(() => {
+                    suppressClearOnNextZoom = true; // 🚀 혹시 몰라 한 번 더 보강
+                    map.setLevel(2);
+                }, 200);
+            }
+
+            // 🔹 선택된 매물의 팝업 오픈
+            openDetailPanel(p);
+        }
+
+        /*************************************************
+         * 현재 지도 범위 내 매물만 반환
+         *************************************************/
+        function getVisibleItems() {
+            const bounds = map.getBounds();
+            const sw = bounds.getSouthWest();
+            const ne = bounds.getNorthEast();
+
+            return valid.filter(p =>
+                p.lat >= sw.getLat() &&
+                p.lat <= ne.getLat() &&
+                p.lng >= sw.getLng() &&
+                p.lng <= ne.getLng()
+            );
+        }
+
+        /*************************************************
+         * 정렬 기능
+         *************************************************/
+        function sortItems(items) {
+            const sortType = document.getElementById("sortSelect").value;
+
+            if (sortType === "deposit_desc")
+                return items.sort((a,b)=> (b.recent_deposit||0)-(a.recent_deposit||0));
+
+            if (sortType === "deposit_asc")
+                return items.sort((a,b)=> (a.recent_deposit||0)-(b.recent_deposit||0));
+
+            if (sortType === "monthly_desc")
+                return items.sort((a,b)=> (b.recent_monthly||0)-(a.recent_monthly||0));
+
+            if (sortType === "monthly_asc")
+                return items.sort((a,b)=> (a.recent_monthly||0)-(b.recent_monthly||0));
+
+            return items;
+        }
+
+        /*************************************************
+         * 리스트 렌더링 (지도 연동)
+         *************************************************/
+        const listBody = document.getElementById("listBody");
+        const listCount = document.getElementById("listCount");
+
+        function renderList(items) {
+            listBody.innerHTML = "";
+            listCount.textContent = items.length.toString();
+
+            // 기존 카드 매핑 초기화
+            for (let key in cardByIdx) {
+                delete cardByIdx[key];
+            }
+
+            items.forEach(p => {
+                const card = document.createElement("div");
+                card.className = "property-card";
+                card.dataset.idx = p.idx;
+
+                const price =
+                    p.lease_type === "전세"
+                        ? `전세 ${p.recent_deposit || '-'}`
+                        : `보증금 ${p.recent_deposit || '-'} / 월 ${p.recent_monthly || '-'}`;
+
+                card.innerHTML = `
+                    <div class="property-title-row">
+                        <div class="property-title">${p.building_name}</div>
+                        <div class="property-badge-wrap">
+                            <span class="badge-chip lease">${p.lease_type}</span>
+                            <span class="badge-chip type">${p.house_type}</span>
+                        </div>
+                    </div>
+                    <div class="property-price">${price}</div>
+                    <div class="property-meta">
+                        <span>${p.district}</span>
+                        <span>${p.floor}</span>
+                        <span>${p.area_p}</span>
+                        <span>${p.recent_yq}</span>
+                    </div>
+                    <div class="property-address">${p.jibun_address}</div>
+                `;
+
+                // 리스트에서 클릭 시 → 해당 마커 강조 & 지도 이동 + 팝업
+                card.addEventListener("click", () => {
+                    selectByIdx(p.idx, true);
+                });
+
+                // 현재 선택된 idx라면 강조 유지
+                if (selectedIdx === p.idx) {
+                    card.classList.add("active");
+                }
+
+                cardByIdx[p.idx] = card;
+                listBody.appendChild(card);
+            });
+        }
+
+        /*************************************************
+         * 클러스터/마커 표시 전환 + 리스트 갱신
+         *************************************************/
+        function updateView() {
+            const lv = map.getLevel();
+
+            if (lv >= 6) {
+                // 동 클러스터 표시, 개별 마커 숨김
+                dongOverlays.forEach(o => o.setMap(map));
+                markers.forEach(m => m.setMap(null));
+            } else {
+                // 개별 마커 표시, 동 클러스터 숨김
+                dongOverlays.forEach(o => o.setMap(null));
+                markers.forEach(m => m.setMap(map));
+            }
+
+            // 지도 화면 안의 매물만 리스트에 표시
+            let visible = getVisibleItems();
+            visible = sortItems(visible);
+            renderList(visible);
+        }
+
+        kakao.maps.event.addListener(map, "dragend", updateView);
+
+        kakao.maps.event.addListener(map, "zoom_changed", () => {
+            // 줌 이벤트 시: 기본적으로 선택 해제
+            if (suppressClearOnNextZoom) {
+                // 우리 코드가 유도한 줌(동 클릭, 리스트 선택 등) → 이번 한 번은 해제 안 함
+                suppressClearOnNextZoom = false;
+            } else {
+                // 사용자가 직접 줌 조작 → 선택 해제 + 팝업 닫기
+                clearSelection();
+            }
+            updateView();
+        });
+
+        // 정렬 선택 변경 시 리스트만 재정렬 + 재렌더
+        document.getElementById("sortSelect").addEventListener("change", () => {
+            updateView();
+        });
+
+        /*************************************************
+         * 초기 실행
+         *************************************************/
+        createDongClusters();
+        updateView();
+
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const panel = document.getElementById("filterPanel");
+        const btn = document.getElementById("filterToggleBtn");
+
+        let isOpen = true;
+
+        btn.addEventListener("click", () => {
+            isOpen = !isOpen;
+
+            if (isOpen) {
+                panel.classList.remove("hidden");
+                // 버튼 안 햄버거 유지 — 아무것도 변경하지 않음
+            } else {
+                panel.classList.add("hidden");
+                // 버튼 안 햄버거 유지 — 아무것도 변경하지 않음
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("filterContainer");
+        const btn = document.getElementById("filterToggleBtn");
+
+        let opened = true;
+
+        btn.addEventListener("click", () => {
+            opened = !opened;
+
+            if (opened) {
+                container.classList.remove("hidden");
+                btn.classList.remove("active");   // 아이콘 원래대로
+            } else {
+                container.classList.add("hidden");
+                btn.classList.add("active");      // 아이콘 회전
+            }
+        });
+    });
+</script>
+
+<!-- 🔵 조회중 로딩 오버레이 -->
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+    <div class="loading-box">
+        <div class="spinner-border text-light" role="status"></div>
+        <div class="loading-text">조회중입니다...</div>
+    </div>
+</div>
+
+</body>
+</html>

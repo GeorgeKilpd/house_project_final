@@ -1,0 +1,162 @@
+/*card.css */
+
+/* ============================================================
+   공통 섹션 레이아웃 (전월세 / 정책)
+============================================================ */
+.section-box {
+    background: transparent !important;
+    padding: 0 !important;
+    margin-top: 20px !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 섹션 헤더 */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-left: 18px;
+    color: #3056A0;
+}
+
+.section-box {
+    margin-top: 60px !important;
+}
+
+.more-btn {
+    font-size: 15px;
+    font-weight: 600;
+    color: #3056A0;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+.more-btn:hover {
+    background: rgba(48,86,160,0.15);
+}
+
+/* ============================================================
+   공통 카드 (전월세 / 정책 통합)
+============================================================ */
+.common-card {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 18px;
+    padding: 22px;
+    height: 400px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    border: 1px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+
+    transition: 0.25s ease;
+}
+
+.common-card:hover {
+    background: rgba(255,255,255,0.65);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+}
+
+/* 제목 */
+.common-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 15px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 내용 */
+.common-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden;
+    position: relative;
+    max-height: 300px;
+}
+
+/* 페이드 효과 제거 */
+.common-body::after {
+    display: none;
+}
+
+/* 정보 블록 */
+.info-block {}
+.info-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #333;
+}
+.info-line {
+    font-size: 15px;
+    line-height: 1.45;
+    color: #444;
+}
+
+/* 버튼 */
+.common-btn {
+    background: #3056A0;
+    color: #fff;
+    padding: 12px;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.common-btn:hover {
+    background: #163C81;
+}
+
+/* Swiper 네비 */
+.house-prev, .house-next,
+.policy-prev, .policy-next {
+    color: #3056A0 !important;
+}
+.house-prev::after, .house-next::after,
+.policy-prev::after, .policy-next::after {
+    font-size: 26px;
+}
+
+/* ===========================
+    반응형 카드 타이포그래피
+=========================== */
+@media (max-width: 992px) {
+    .common-title { font-size: 19px; }
+    .info-title   { font-size: 15px; }
+    .info-line    { font-size: 14px; }
+    .common-btn   { font-size: 15px; padding: 10px; }
+}
+
+@media (max-width: 768px) {
+    .common-title { font-size: 18px; }
+    .info-title   { font-size: 14px; }
+    .info-line    { font-size: 13px; }
+    .common-btn   { font-size: 14px; padding: 9px; }
+}
+
+@media (max-width: 576px) {
+    .common-title { font-size: 16px; }
+    .info-title   { font-size: 13px; }
+    .info-line    { font-size: 12.5px; }
+    .common-btn   { font-size: 13px; padding: 8px; }
+}
+

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- 상단 여백 조정 (mt-5, pt-5) -->
+<div class="container mt-5 pt-5 mb-5">
+
+  <!-- 제목 + 밑줄 -->
+  <div class="mb-5" style="width:60%; margin:0 auto;"> <!-- ✅ 제목과 밑줄 영역 아래 여백 조정 -->
+    <h2 class="fw-bold" style="color:#FFFFFF; text-align:left;">로그인</h2>
+    <hr style="border: 2px solid #FFFFFF; margin-left:0;"> <!-- ✅ 밑줄 왼쪽 정렬, 색상 진하게 -->
+  </div>
+
+  <!-- 로그인 폼 -->
+  <div class="d-flex justify-content-center">
+    <form method="POST" style="width:380px;">
+      {{ form.hidden_tag() }}
+
+      <!-- 아이디 -->
+      <div class="mb-4">
+        {{ form.username.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.username(class="form-control border-0 border-bottom rounded-0", placeholder="아이디 입력", style="border-color:#385fac;") }}
+      </div>
+
+      <!-- 비밀번호 -->
+      <div class="mb-4">
+        {{ form.password.label(class="form-label fw-semibold", style="color:#FFFFFF;") }}
+        {{ form.password(class="form-control border-0 border-bottom rounded-0", placeholder="비밀번호 입력", style="border-color:#385fac;") }}
+      </div>
+
+      <!-- 로그인 버튼 -->
+      <div class="d-grid mt-4 mb-5"> <!-- ✅ 버튼과 하단 링크 사이 간격 mb-5 추가 -->
+        <button type="submit" class="btn fw-bold"
+                style="border: 2px solid #FFFFFF; color: #FFFFFF; border-radius: 10px; padding: 10px 0; background-color: transparent;">
+          로그인
+        </button>
+      </div>
+
+      <!-- 하단 링크 -->
+      <div class="d-flex justify-content-between mt-4 mb-5"> <!-- ✅ 하단 링크와 푸터 간격 mb-5 추가 -->
+        <a href="#" class="small" style="color:#385fac; text-decoration:none;">아이디 / 비밀번호 찾기</a>
+        <a href="{{ url_for('login.signup') }}" class="small" style="color:#385fac; text-decoration:none;">회원가입</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% endblock %}
