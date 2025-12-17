@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from app.model import HouseInfo
 from sqlalchemy import and_
+import os
 
 bp = Blueprint("predict", __name__, url_prefix="/predict")
 
