@@ -1,6 +1,44 @@
-flask
-flask_sqlalchemy
-pandas
-openpyxl
-joblib
+# =========================
+# Flask Web
+# =========================
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-WTF
+WTForms
+email-validator
 
+# =========================
+# DB / ORM
+# =========================
+SQLAlchemy
+alembic
+greenlet
+
+# =========================
+# Data / ML
+# =========================
+numpy
+pandas
+scikit-learn
+scipy
+joblib
+xgboost
+
+# =========================
+# LLM / NLP
+# =========================
+transformers
+tokenizers
+huggingface-hub
+safetensors
+regex
+tqdm
+
+# =========================
+# Utils
+# =========================
+requests
+python-dotenv
+PyYAML
+packaging
