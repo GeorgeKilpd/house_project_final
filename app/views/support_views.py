@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, url_for, jsonify
 from app.model import SupportList
 from sqlalchemy import or_, case
-from app.nlp.pipelines import run_policy_qa,run_sentiment,translate_ko_to_en,generate_text,run_ner
+from app.nlp.pipelines import run_policy_qa, run_sentiment, translate_ko_to_en, generate_text, run_ner
+
 
 import json
 
@@ -57,6 +58,7 @@ def detail_view(pid: int):
 # 🔹 생성형 AI 통합 챗봇 API  ---------------------------------
 @bp.route("/api/genai-chat", methods=["POST"])
 def genai_chat_api():
+
     """
     모달에서 호출하는 생성형 AI 통합 챗봇 API.
     request JSON: { "task": "...", "text": "...", "context": "..." }
