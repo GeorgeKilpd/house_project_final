@@ -273,3 +273,68 @@ body {
     width: 130px !important;
   }
 }
+
+
+/* ============================
+   5) 생성형 AI 모달 톤 통일
+============================ */
+.modal-content {
+  background: rgba(15,23,42,0.96) !important;  /* 전체 배경과 비슷한 네이비 */
+  color: #f8fafc !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+.modal-header {
+  background: rgba(15,23,42,0.96) !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+.modal-title {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.btn-close {
+  filter: invert(1) brightness(200%) !important;
+}
+
+.modal-body {
+  background: rgba(30,41,59,0.85) !important;
+  color: #f1f5f9 !important;
+  border-radius: 0 0 16px 16px !important;
+}
+
+/* 채팅박스 배경도 톤 맞추기 */
+#genai-chat-box {
+  background: rgba(15,23,42,0.6) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+
+
+
+/* ============================
+   6) 챗봇 말풍선
+============================ */
+.chat-bubble {
+  border-radius: 12px;
+  padding: 8px 12px;
+  max-width: 70%;
+  line-height: 1.4;
+}
+
+/* 사용자 말풍선 (오른쪽, 파란색) */
+.chat-bubble.user {
+  background-color: #2563eb !important;  /* 살짝 다운된 파란색 */
+  color: #fff !important;
+}
+
+/* 봇 말풍선 (왼쪽, 네이비 톤 + 흰 글씨) */
+.chat-bubble.assistant {
+  background-color: rgba(255,255,255,1) !important;
+  color: #000 !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  backdrop-filter: blur(6px);
+}
