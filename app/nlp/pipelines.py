@@ -1,12 +1,9 @@
 # app/nlp/pipelines.py
 import os
 import torch
-from transformers import pipeline
 
 # -----------------------------
-# 0) 캐시 경로 (RunPod /workspace 추천)
-#   - runpod에서 export로 주는게 베스트지만,
-#     코드에서도 안전하게 한번 더 잡아줌
+# 0) 캐시 경로 (transformers import 전에!)
 # -----------------------------
 DEFAULT_HF_HOME = os.environ.get("HF_HOME", "/workspace/.cache/huggingface")
 os.environ.setdefault("HF_HOME", DEFAULT_HF_HOME)
@@ -14,12 +11,14 @@ os.environ.setdefault("HF_HUB_CACHE", os.path.join(DEFAULT_HF_HOME, "hub"))
 os.environ.setdefault("TRANSFORMERS_CACHE", os.path.join(DEFAULT_HF_HOME, "transformers"))
 os.environ.setdefault("TORCH_HOME", os.environ.get("TORCH_HOME", "/workspace/.cache/torch"))
 
+from transformers import pipeline  # ✅ 캐시 설정 이후 import
+
 # -----------------------------
-# 1) 디바이스 결정
-#   - RunPod에서 GPU가 없으면 -1 (CPU)
-#   - GPU가 있어도 VRAM 아끼려면 일부는 CPU로 돌리는 선택도 가능
+# 1) 디바이스 결정 (pipeline용)
+#   - CUDA 있으면 GPU
+#   - 그 외는 CPU (MPS는 모델별로 불안정해서 일단 CPU 권장)
 # -----------------------------
-DEVICE = 0 if torch.cuda.is_available() else -1
+PIPELINE_DEVICE = 0 if torch.cuda.is_available() else -1
 
 # -----------------------------
 # 2) 파이프라인 싱글톤 (Lazy)
@@ -38,7 +37,7 @@ def _get_policy_qa():
             "question-answering",
             model="monologg/koelectra-base-v3-finetuned-korquad",
             tokenizer="monologg/koelectra-base-v3-finetuned-korquad",
-            device=DEVICE,
+            device=PIPELINE_DEVICE,
         )
     return _policy_qa_model
 
@@ -50,7 +49,7 @@ def _get_text_gen():
             "text-generation",
             model="skt/kogpt2-base-v2",
             tokenizer="skt/kogpt2-base-v2",
-            device=DEVICE,
+            device=PIPELINE_DEVICE,
         )
     return _text_gen_model
 
@@ -62,7 +61,7 @@ def _get_ko2en():
             "translation",
             model="Helsinki-NLP/opus-mt-ko-en",
             tokenizer="Helsinki-NLP/opus-mt-ko-en",
-            device=DEVICE,
+            device=PIPELINE_DEVICE,
         )
     return _ko2en_model
 
@@ -74,24 +73,19 @@ def _get_sentiment():
             "sentiment-analysis",
             model="nlptown/bert-base-multilingual-uncased-sentiment",
             tokenizer="nlptown/bert-base-multilingual-uncased-sentiment",
-            device=DEVICE,
+            device=PIPELINE_DEVICE,
         )
     return _sentiment_model
 
 
 def _get_ner():
-    """
-    ⚠️ 주의: 지금 코드는 model을 안 적어서 기본값으로 잡히는데,
-    환경에 따라 모델을 받다가 커지거나 불안정할 수 있어.
-    가능하면 명시 모델 추천.
-    (일단은 기존 동작 유지)
-    """
     global _ner_model
     if _ner_model is None:
+        # ⚠️ 가능하면 모델 명시 추천 (지금은 기존 동작 유지)
         _ner_model = pipeline(
             "ner",
             grouped_entities=True,
-            device=DEVICE,
+            device=PIPELINE_DEVICE,
         )
     return _ner_model
 
@@ -99,10 +93,18 @@ def _get_ner():
 # -----------------------------
 # 3) 외부에서 쓰는 함수들 (API)
 # -----------------------------
+def run_llama3(prompt: str) -> dict:
+    if not prompt:
+        return {"answer": ""}
+
+    # ✅ LLaMA는 무거우니 필요할 때만 import (lazy)
+    from .llama3_loader import llama3_generate
+    return {"answer": llama3_generate(prompt)}
+
+
 def run_policy_qa(context: str, question: str) -> dict:
     if not context or not question:
         return {"answer": "", "score": 0.0}
-
     qa = _get_policy_qa()
     return qa(question=question, context=context)
 
@@ -110,7 +112,6 @@ def run_policy_qa(context: str, question: str) -> dict:
 def generate_text(prompt: str, max_new_tokens: int = 80) -> str:
     if not prompt:
         return ""
-
     gen = _get_text_gen()
     outputs = gen(
         prompt,
