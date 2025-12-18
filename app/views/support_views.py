@@ -1,10 +1,31 @@
+import os
+import json
+import requests
 from flask import Blueprint, render_template, request, url_for, jsonify
-from app.model import SupportList
 from sqlalchemy import or_, case
 from app.nlp.pipelines import run_policy_qa, run_sentiment, translate_ko_to_en, generate_text, run_ner
+from app.model import SupportList
 
 
-import json
+
+
+LLAMA_URL = os.getenv("LLAMA_URL", "http://127.0.0.1:8000/llama/generate")
+
+def call_llama3(text: str, max_new_tokens=256, temperature=0.2, top_p=0.95):
+    r = requests.post(
+        LLAMA_URL,
+        json={
+            "text": text,
+            "max_new_tokens": max_new_tokens,
+            "temperature": temperature,
+            "top_p": top_p,
+        },
+        timeout=120,
+    )
+    r.raise_for_status()
+    return r.json().get("answer", "")
+
+
 
 bp = Blueprint('support', __name__, url_prefix='/support')
 
@@ -53,6 +74,11 @@ def detail_view(pid: int):
         return f"지원하지 않는 유형입니다: {item.source_type}", 400
 
     return render_template(template_name, data=detail, return_url=return_url)
+
+# 라마 3 페이지 이동
+@bp.route("/llama3")
+def llama3_page():
+    return render_template("llama3.html")
 
 
 # 🔹 생성형 AI 통합 챗봇 API  ---------------------------------
@@ -134,6 +160,10 @@ def genai_chat_api():
     # 5) 텍스트 생성
     elif task == "generate":
         answer = generate_text(text)
+
+
+ 
+
 
     else:
         return jsonify({"error": f"지원하지 않는 task입니다: {task}"}), 400

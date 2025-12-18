@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container" style="max-width: 900px; margin: 40px auto;">
+  <h2 style="margin-bottom: 16px;">LLaMA 3 Assistant</h2>
+
+  <div id="chatBox" style="
+      border: 1px solid #2a2f3a; border-radius: 12px;
+      padding: 16px; height: 420px; overflow:auto; background:#0f172a; color:#e5e7eb;">
+  </div>
+
+  <div style="display:flex; gap:10px; margin-top:12px;">
+    <textarea id="userInput" rows="2" style="flex:1; border-radius:10px; padding:12px;"
+      placeholder="LLaMA3에게 물어보세요..."></textarea>
+    <button id="sendBtn" style="width:120px; border-radius:10px;">보내기</button>
+  </div>
+
+  <div id="status" style="margin-top:10px; color:#94a3b8;"></div>
+</div>
+
+<script>
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const statusEl = document.getElementById("status");
+
+function addMsg(role, text) {
+  const wrap = document.createElement("div");
+  wrap.style.margin = "10px 0";
+  wrap.style.display = "flex";
+  wrap.style.justifyContent = (role === "user") ? "flex-end" : "flex-start";
+
+  const bubble = document.createElement("div");
+  bubble.style.maxWidth = "80%";
+  bubble.style.whiteSpace = "pre-wrap";
+  bubble.style.padding = "10px 12px";
+  bubble.style.borderRadius = "12px";
+  bubble.style.background = (role === "user") ? "#2563eb" : "#111827";
+  bubble.style.color = "#fff";
+  bubble.textContent = text;
+
+  wrap.appendChild(bubble);
+  chatBox.appendChild(wrap);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function send() {
+  const text = userInput.value.trim();
+  if (!text) return;
+
+  addMsg("user", text);
+  userInput.value = "";
+  statusEl.textContent = "생성 중...";
+
+  try {
+    const res = await fetch("/support/api/llama3", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ text })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Server error");
+
+    addMsg("assistant", data.answer || "(empty)");
+  } catch (e) {
+    addMsg("assistant", "에러: " + e.message);
+  } finally {
+    statusEl.textContent = "";
+  }
+}
+
+sendBtn.addEventListener("click", send);
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+</script>
+
+{% endblock %}
