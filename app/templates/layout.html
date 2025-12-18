@@ -287,7 +287,22 @@ function addBubble(text, role) {
 }
 
 
+    // ✅ 키보드/중복 방지에 필요한 상태값만 추가 (다른 부분은 그대로)
+    let isComposing = false;
+    let sending = false;
+
+    inputEl.addEventListener("compositionstart", () => {
+      isComposing = true;
+    });
+
+    inputEl.addEventListener("compositionend", () => {
+      isComposing = false;
+    });
+
     async function sendMessage() {
+      if (sending) return;      // ✅ 중복 호출 방지
+      sending = true;
+
       const task = taskEl.value;
       const text = (inputEl.value || "").trim();
       const context = (contextEl.value || "").trim();
@@ -298,11 +313,13 @@ function addBubble(text, role) {
       if (!text) {
         errorEl.textContent = "프롬프트를 입력해주세요.";
         errorEl.style.display = "block";
+        sending = false;
         return;
       }
       if (task === "qa" && !context) {
         errorEl.textContent = "정책 Q&A는 context(정책 내용)가 필요합니다.";
         errorEl.style.display = "block";
+        sending = false;
         return;
       }
 
@@ -319,27 +336,45 @@ function addBubble(text, role) {
           body: JSON.stringify({ task, text, context })
         });
 
-        const data = await resp.json();
         loadingEl.style.display = "none";
 
+        // ✅ (수정) JSON이 아닌 응답(404/500 HTML)도 안전하게 처리
+        const contentType = resp.headers.get("content-type") || "";
+        let data = null;
+        let rawText = "";
+
+        if (contentType.includes("application/json")) {
+          data = await resp.json();
+        } else {
+          rawText = await resp.text();
+        }
+
         if (!resp.ok) {
-          errorEl.textContent = data.error || "에러가 발생했습니다.";
+          errorEl.textContent =
+            (data && data.error) ||
+            `HTTP ${resp.status} ${resp.statusText}\n` + (rawText ? rawText.slice(0, 300) : "(no body)");
           errorEl.style.display = "block";
           return;
         }
 
-        addBubble(data.answer || "(빈 응답)", "bot");
+        addBubble((data && data.answer) || "(빈 응답)", "bot");
       } catch (e) {
         loadingEl.style.display = "none";
-        errorEl.textContent = "서버 통신 오류가 발생했습니다.";
+        errorEl.textContent = "서버 통신 오류가 발생했습니다.\n" + (e?.message || e);
         errorEl.style.display = "block";
         console.error(e);
+      } finally {
+        sending = false;        // ✅ 무조건 락 해제
       }
     }
 
     sendBtn.addEventListener("click", sendMessage);
+
     inputEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
+        // ✅ 한글 조합 중이면 Enter 무시
+        if (isComposing || e.isComposing) return;
+
         e.preventDefault();
         sendMessage();
       }
