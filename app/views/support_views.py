@@ -97,6 +97,7 @@ def genai_chat_api():
     response JSON: { "answer": "..." }
     """
     data = request.get_json() or {}
+    answer = ""
 
     task = (data.get("task") or "").strip()
     text = (data.get("text") or "").strip()
@@ -162,7 +163,7 @@ def genai_chat_api():
         answer = generate_text(text)
 
 
- 
+
 
 
     else:
@@ -170,4 +171,19 @@ def genai_chat_api():
 
     # 공통 응답
     return jsonify({"answer": answer})
+
+@bp.route("/api/llama3", methods=["POST"])
+def llama3_api():
+    data = request.get_json() or {}
+    text = (data.get("text") or "").strip()
+    if not text:
+        return jsonify({"error": "text가 비어있습니다."}), 400
+
+    try:
+        answer = call_llama3(text)
+        return jsonify({"answer": answer})
+    except Exception as e:
+        # 원인 로그 확인용
+        print("LLAMA3 API ERROR:", repr(e))
+        return jsonify({"error": str(e)}), 500
 
