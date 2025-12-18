@@ -1,180 +1,390 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}청년 주거 솔루션{% endblock %}</title>
 
-{% block title %}LLaMA3{% endblock %}
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-{% block content %}
-<div class="container my-4" style="max-width: 980px;">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="fw-bold mb-0">LLaMA3</h2>
-    <span class="text-muted small">RunPod에서 LLaMA 서버(8000)가 떠 있어야 응답이 됩니다.</span>
-  </div>
+  <!-- 공통 레이아웃 CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
 
-  <div class="card shadow-sm border-0 rounded-4">
-    <div class="card-header bg-primary text-white border-0 rounded-top-4 d-flex align-items-center justify-content-between">
-      <div class="fw-bold">LLaMA3 Chat</div>
-      <button id="llama-clear" class="btn btn-sm btn-light">대화 지우기</button>
+  <!-- 🔥 페이지 개별 CSS 로딩 -->
+  {% block page_css %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom py-2">
+    <div class="container-fluid px-4">
+
+      <a class="navbar-brand" href="{{ url_for('index.index') }}">
+        <img src="{{ url_for('static', filename='image/logo2.png') }}"
+             alt="청년 주거 솔루션 로고"
+             style="height:40px; width:auto;">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="topNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="{{ url_for('predict.predict_search') }}">전월세 예측</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="{{ url_for('support.support_search') }}">정부지원 정책</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('support.llama3_page') }}">LLaMA3</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link"
+               href="#"
+               data-bs-toggle="modal"
+               data-bs-target="#genaiModal">
+              생성형 AI
+            </a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="{{ url_for('login.login') }}">로그인</a>
+          </li>
+          <li class="nav-item ms-3">
+            <a class="nav-link" href="{{ url_for('login.signup') }}">회원가입</a>
+          </li>
+        </ul>
+      </div>
+
     </div>
+  </nav>
 
-    <div class="card-body bg-light rounded-bottom-4">
+  <!-- 🔥 모든 페이지 풀스크린 지원 -->
+  <main class="{% block main_class %}{% endblock %}">
+    {% block content %}
+    {% endblock %}
+  </main>
 
-      <!-- 채팅 영역: 모달과 동일한 느낌 -->
-      <div id="llama-chat-box"
-           class="border rounded-3 p-3 mb-3 bg-white"
-           style="height:360px; overflow-y:auto;">
-        <div class="text-muted small">
-          LLaMA3에게 질문을 입력해 보세요.
+  <!-- 🔥 생성형 AI 모달 (챗봇 UI) -->
+  <div class="modal fade" id="genaiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0 rounded-4">
+
+        <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+          <h5 class="modal-title fw-bold">생성형 AI 도우미</h5>
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"></button>
         </div>
+
+        <div class="modal-body bg-light">
+
+          <!-- 기능 선택 -->
+          <div class="mb-3">
+            <label class="form-label">기능 선택</label>
+            <select id="genai-task" class="form-select">
+              <option value="generate">텍스트 생성</option>
+              <option value="translate">번역</option>
+              <option value="sentiment">감성분석</option>
+              <option value="ner">개체명 인식</option>
+              <option value="qa">정책 Q&A</option>
+            </select>
+          </div>
+
+          <!-- QA 전용 context 입력 (기본은 숨김) -->
+          <div class="mb-3" id="genai-context-box" style="display:none;">
+            <label class="form-label">Context (정책 내용)</label>
+            <textarea id="genai-context" class="form-control" rows="4"
+                      placeholder="정책 전문 또는 설명 텍스트를 입력하세요."></textarea>
+          </div>
+
+          <!-- 👇 채팅 히스토리 영역 -->
+          <div id="genai-chat-box"
+               class="border rounded-3 p-3 mb-3 bg-white"
+               style="height:260px; overflow-y:auto;">
+            <div class="text-muted small">
+              생성형 AI 도우미에게 먼저 말을 걸어보세요.
+            </div>
+          </div>
+
+          <!-- 👇 입력 영역 -->
+          <div class="d-flex gap-2">
+            <textarea id="genai-input"
+                      class="form-control"
+                      rows="2"
+                      placeholder="프롬프트를 입력하세요. (질문, 번역할 문장 등)"></textarea>
+            <button id="genai-send" class="btn btn-primary flex-shrink-0">
+              보내기
+            </button>
+          </div>
+
+          <!-- 상태/에러 메시지 -->
+          <div id="genai-loading" class="mt-2 small text-muted" style="display:none;">
+            🔄 처리 중입니다...
+          </div>
+
+          <div id="genai-error" class="mt-2 small text-danger" style="display:none;"></div>
+
+        </div> <!-- /modal-body -->
+
+      </div> <!-- /modal-content -->
+    </div>   <!-- /modal-dialog -->
+  </div>     <!-- /modal -->
+
+  <!-- FOOTER ------------------------------------------------------------ -->
+  <section class="logo-bar">
+    <div class="logo-slider">
+      <div class="logo-track">
+        {% set logos = [
+          ('logo_gov24.png','https://www.gov.kr/'),
+          ('logo_mailmove.png','https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=17210000001'),
+          ('logo_movein.png','https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13100000016'),
+          ('logo_juso.png','https://www.juso.go.kr/openIndexPage.do'),
+          ('logo_iros.png','https://www.iros.go.kr/index.jsp'),
+          ('logo_kepco.png','https://online.kepco.co.kr/'),
+          ('logo_seoulgas.png','https://www.seoulgas.co.kr/front/main.do'),
+          ('logo_lh.png','https://www.lh.or.kr/'),
+          ('logo_sh.png','https://www.sh.co.kr/'),
+          ('logo_reb.png','https://www.reb.or.kr/'),
+          ('logo_arisu.png','https://i121.seoul.go.kr/cs/cyber/front/main/NR_index.do'),
+          ('logo_molit.png','https://www.molit.go.kr/')
+        ] %}
+
+        {% for logo, url in logos %}
+        <a href="{{ url }}" target="_blank">
+          <img src="{{ url_for('static', filename='image/' ~ logo) }}" class="logo">
+        </a>
+        {% endfor %}
+        {% for logo, url in logos %}
+        <a href="{{ url }}" target="_blank">
+          <img src="{{ url_for('static', filename='image/' ~ logo) }}" class="logo">
+        </a>
+        {% endfor %}
+
       </div>
+    </div>
+  </section>
 
-      <!-- 입력 -->
-      <div class="d-flex gap-2">
-        <textarea id="llama-input"
-                  class="form-control"
-                  rows="2"
-                  placeholder="질문을 입력하세요. (Enter=전송 / Shift+Enter=줄바꿈)"></textarea>
+  <footer class="footer-section">
+    <div class="container px-4">
 
-        <button id="llama-send" class="btn btn-primary flex-shrink-0">
-          보내기
-        </button>
-      </div>
+      <div class="footer-flex">
 
-      <!-- 상태/에러 -->
-      <div id="llama-loading" class="mt-2 small text-muted" style="display:none;">
-        🔄 생성 중입니다...
-      </div>
-      <div id="llama-error" class="mt-2 small text-danger" style="display:none;"></div>
+        <!-- 왼쪽: 로고 -->
+        <div class="footer-left">
+          <img src="{{ url_for('static', filename='image/logo2.png') }}"
+               alt="청년 주거 솔루션 로고"
+               style="height:60px; width:auto;">
+        </div>
 
-      <div class="mt-2 small text-muted">
-        ※ 에러가 “Connection refused”면 8000번 LLaMA 서버가 아직 실행되지 않은 상태입니다.
+        <!-- 가운데: 상담센터/전화 + 메뉴 + COPYRIGHT -->
+        <div class="footer-center">
+
+          <div class="footer-top">
+            청년주거 상담센터 <strong>02-987-6543</strong> │ 데이터·시세 문의 <strong>02-111-2222</strong>
+          </div>
+
+          <div class="footer-menu mt-2">
+            <a href="#">회사소개</a>
+            <a href="#">이용안내</a>
+            <a href="#">개인정보처리방침</a>
+          </div>
+
+          <div class="footer-bottom mt-2">
+            COPYRIGHT © 2025 YOUTH HOUSING SOLUTION. ALL RIGHTS RESERVED.
+          </div>
+
+        </div>
+
+        <!-- 오른쪽: 메뉴 바로가기 -->
+        <div class="footer-right">
+          <div class="footer-dropdown">
+            <button class="footer-dropdown-btn" id="dropdownToggle">메뉴 바로가기 ▾</button>
+
+            <div class="footer-dropdown-list" id="dropdownMenu">
+              <a href="{{ url_for('index.index') }}">메인페이지</a>
+              <a href="{{ url_for('predict.predict_search') }}">전월세 예측</a>
+              <a href="{{ url_for('support.support_search') }}">정부지원 정책</a>
+              <a href="{{ url_for('inquiry.inquiry_list') }}">문의하기</a>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
-  </div>
-</div>
-{% endblock %}
+  </footer>
 
-{% block extra_js %}
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const inputEl = document.getElementById("llama-input");
-  const sendBtn = document.getElementById("llama-send");
-  const clearBtn = document.getElementById("llama-clear");
-  const chatBox = document.getElementById("llama-chat-box");
-  const loadingEl = document.getElementById("llama-loading");
-  const errorEl = document.getElementById("llama-error");
+  <!-- FOOTER 드롭다운 JS -->
+  <script>
+    const toggleBtn = document.getElementById("dropdownToggle");
+    const menu = document.getElementById("dropdownMenu");
 
-  // 말풍선 (genai 모달 톤 그대로)
-  function addBubble(text, role) {
-    const wrap = document.createElement("div");
-    wrap.classList.add("mb-2", "d-flex");
-
-    const bubble = document.createElement("div");
-    bubble.classList.add("chat-bubble", "small", "p-2");
-
-    if (role === "user") {
-      wrap.classList.add("justify-content-end");
-      bubble.classList.add("bg-primary", "text-white", "rounded-3", "shadow-sm");
-      bubble.style.maxWidth = "85%";
-    } else {
-      wrap.classList.add("justify-content-start");
-      bubble.classList.add("bg-white", "text-dark", "border", "rounded-3", "shadow-sm");
-      bubble.style.maxWidth = "85%";
-    }
-
-    bubble.textContent = text;
-    wrap.appendChild(bubble);
-    chatBox.appendChild(wrap);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  // 키보드/중복 방지
-  let isComposing = false;
-  let sending = false;
-
-  inputEl.addEventListener("compositionstart", () => { isComposing = true; });
-  inputEl.addEventListener("compositionend", () => { isComposing = false; });
-
-  async function sendMessage() {
-    if (sending) return;
-    sending = true;
-
-    const text = (inputEl.value || "").trim();
-    errorEl.style.display = "none";
-    errorEl.textContent = "";
-
-    if (!text) {
-      errorEl.textContent = "질문을 입력해주세요.";
-      errorEl.style.display = "block";
-      sending = false;
-      return;
-    }
-
-    addBubble(text, "user");
-    inputEl.value = "";
-    loadingEl.style.display = "block";
-    sendBtn.disabled = true;
-
-    try {
-      const resp = await fetch("/support/api/llama3", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+    if (toggleBtn && menu) {
+      toggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.toggle("show");
       });
 
-      const contentType = resp.headers.get("content-type") || "";
-      let data = null;
-      let rawText = "";
+      document.addEventListener("click", () => {
+        menu.classList.remove("show");
+      });
+    }
+  </script>
 
-      if (contentType.includes("application/json")) {
-        data = await resp.json();
+  <!-- 🔥 생성형 AI 모달 JS (챗봇 동작) -->
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const taskEl = document.getElementById("genai-task");
+    const contextBox = document.getElementById("genai-context-box");
+    const contextEl = document.getElementById("genai-context");
+    const inputEl = document.getElementById("genai-input");
+    const sendBtn = document.getElementById("genai-send");
+    const chatBox = document.getElementById("genai-chat-box");
+    const loadingEl = document.getElementById("genai-loading");
+    const errorEl = document.getElementById("genai-error");
+
+    if (!taskEl) return;  // 모달 없는 페이지에서 에러 방지
+
+    // 기능 선택 시 QA일 때만 context 보이기
+    taskEl.addEventListener("change", () => {
+      if (taskEl.value === "qa") {
+        contextBox.style.display = "block";
       } else {
-        rawText = await resp.text();
+        contextBox.style.display = "none";
+        contextEl.value = "";
       }
+    });
 
-      loadingEl.style.display = "none";
+    // 말풍선 추가 헬퍼
+function addBubble(text, role) {
+  const wrap = document.createElement("div");
+  wrap.classList.add("mb-2", "d-flex");
 
-      if (!resp.ok) {
-        const msg =
-          (data && data.error) ||
-          `HTTP ${resp.status} ${resp.statusText}\n` + (rawText ? rawText.slice(0, 300) : "(no body)");
-        errorEl.textContent = msg;
+  const bubble = document.createElement("div");
+  // 공통 말풍선 클래스
+  bubble.classList.add("chat-bubble", "small");
+
+  if (role === "user") {
+    // 오른쪽 정렬 + 사용자 스타일
+    wrap.classList.add("justify-content-end");
+    bubble.classList.add("user", "bg-primary", "text-white", "rounded-3", "shadow-sm");
+  } else {
+    // 왼쪽 정렬 + 어시스턴트 스타일
+    wrap.classList.add("justify-content-start");
+    bubble.classList.add("assistant", "rounded-3", "shadow-sm");
+    // bg-white / text 색상은 CSS에서 지정
+  }
+
+  bubble.textContent = text;
+  wrap.appendChild(bubble);
+
+  chatBox.appendChild(wrap);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+    // ✅ 키보드/중복 방지에 필요한 상태값만 추가 (다른 부분은 그대로)
+    let isComposing = false;
+    let sending = false;
+
+    inputEl.addEventListener("compositionstart", () => {
+      isComposing = true;
+    });
+
+    inputEl.addEventListener("compositionend", () => {
+      isComposing = false;
+    });
+
+    async function sendMessage() {
+      if (sending) return;      // ✅ 중복 호출 방지
+      sending = true;
+
+      const task = taskEl.value;
+      const text = (inputEl.value || "").trim();
+      const context = (contextEl.value || "").trim();
+
+      errorEl.style.display = "none";
+      errorEl.textContent = "";
+
+      if (!text) {
+        errorEl.textContent = "프롬프트를 입력해주세요.";
         errorEl.style.display = "block";
-        addBubble("오류가 발생했습니다. 아래 메시지를 확인해주세요.", "bot");
         sending = false;
-        sendBtn.disabled = false;
+        return;
+      }
+      if (task === "qa" && !context) {
+        errorEl.textContent = "정책 Q&A는 context(정책 내용)가 필요합니다.";
+        errorEl.style.display = "block";
+        sending = false;
         return;
       }
 
-      addBubble((data && data.answer) || "(빈 응답)", "bot");
+      // 사용자 말풍선 추가
+      addBubble(text, "user");
+      inputEl.value = "";
 
-    } catch (e) {
-      loadingEl.style.display = "none";
-      errorEl.textContent = "서버 통신 오류가 발생했습니다.\n" + (e?.message || e);
-      errorEl.style.display = "block";
-      addBubble("서버 통신 오류가 발생했습니다.", "bot");
-    } finally {
-      sending = false;
-      sendBtn.disabled = false;
-      inputEl.focus();
+      loadingEl.style.display = "block";
+
+      try {
+        const resp = await fetch("{{ url_for('support.genai_chat_api') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ task, text, context })
+        });
+
+        loadingEl.style.display = "none";
+
+        // ✅ (수정) JSON이 아닌 응답(404/500 HTML)도 안전하게 처리
+        const contentType = resp.headers.get("content-type") || "";
+        let data = null;
+        let rawText = "";
+
+        if (contentType.includes("application/json")) {
+          data = await resp.json();
+        } else {
+          rawText = await resp.text();
+        }
+
+        if (!resp.ok) {
+          errorEl.textContent =
+            (data && data.error) ||
+            `HTTP ${resp.status} ${resp.statusText}\n` + (rawText ? rawText.slice(0, 300) : "(no body)");
+          errorEl.style.display = "block";
+          return;
+        }
+
+        addBubble((data && data.answer) || "(빈 응답)", "bot");
+      } catch (e) {
+        loadingEl.style.display = "none";
+        errorEl.textContent = "서버 통신 오류가 발생했습니다.\n" + (e?.message || e);
+        errorEl.style.display = "block";
+        console.error(e);
+      } finally {
+        sending = false;        // ✅ 무조건 락 해제
+      }
     }
-  }
 
-  sendBtn.addEventListener("click", sendMessage);
+    sendBtn.addEventListener("click", sendMessage);
 
-  inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      if (isComposing || e.isComposing) return;
-      e.preventDefault();
-      sendMessage();
-    }
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        // ✅ 한글 조합 중이면 Enter 무시
+        if (isComposing || e.isComposing) return;
+
+        e.preventDefault();
+        sendMessage();
+      }
+    });
   });
+  </script>
 
-  clearBtn.addEventListener("click", () => {
-    chatBox.innerHTML = '<div class="text-muted small">LLaMA3에게 질문을 입력해 보세요.</div>';
-    errorEl.style.display = "none";
-    errorEl.textContent = "";
-    inputEl.focus();
-  });
-});
-</script>
-{% endblock %}
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
