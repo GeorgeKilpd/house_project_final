@@ -79,9 +79,7 @@ def health():
 def generate(req: GenReq):
     prompt = build_prompt(req.text)
     inputs = tokenizer(prompt, return_tensors="pt")
-    device = next(model.parameters()).device
-    inputs = {k: v.to(device) for k, v in inputs.items()}
-
+    
     out = model.generate(
         **inputs,
         max_new_tokens=req.max_new_tokens,
