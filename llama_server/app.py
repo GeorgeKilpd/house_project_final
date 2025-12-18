@@ -56,7 +56,6 @@ def load_model():
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
         quantization_config=quant,
-        device_map="auto",
         torch_dtype=dtype,
         token=HF_TOKEN,
     )
@@ -79,7 +78,7 @@ def health():
 def generate(req: GenReq):
     prompt = build_prompt(req.text)
     inputs = tokenizer(prompt, return_tensors="pt")
-    
+
     out = model.generate(
         **inputs,
         max_new_tokens=req.max_new_tokens,
