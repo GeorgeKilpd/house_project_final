@@ -3,10 +3,10 @@ import os
 import torch
 from fastapi import FastAPI
 from pydantic import BaseModel
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Meta-Llama-3-8B")
-HF_TOKEN = os.getenv("HF_TOKEN")  # 환경변수로만
+MODEL_ID = os.getenv("MODEL_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 app = FastAPI()
 
@@ -38,27 +38,18 @@ def load_model():
     if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
         dtype = torch.bfloat16
 
-    quant = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=dtype,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-    )
-
     tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_ID,
-        token=HF_TOKEN,
-        use_fast=True,
+        MODEL_ID, token=HF_TOKEN, use_fast=True
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_ID,
-        quantization_config=quant,
         torch_dtype=dtype,
         token=HF_TOKEN,
-    )
+    ).to("cuda")   # fp16/bf16에서는 OK
+
     model.eval()
 
 @app.on_event("startup")
@@ -67,17 +58,13 @@ def startup():
 
 @app.get("/health")
 def health():
-    return {
-        "ok": True,
-        "cuda": torch.cuda.is_available(),
-        "model_loaded": model is not None,
-    }
+    return {"ok": True, "cuda": torch.cuda.is_available(), "model_loaded": model is not None}
 
 @app.post("/llama/generate")
 @torch.inference_mode()
 def generate(req: GenReq):
     prompt = build_prompt(req.text)
-    inputs = tokenizer(prompt, return_tensors="pt")
+    inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
 
     out = model.generate(
         **inputs,
@@ -92,5 +79,4 @@ def generate(req: GenReq):
     decoded = tokenizer.decode(out[0], skip_special_tokens=True)
     if "### Response:" in decoded:
         decoded = decoded.split("### Response:")[-1].strip()
-
     return {"answer": decoded}
