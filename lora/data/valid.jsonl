@@ -1,0 +1,3 @@
+{"instruction":"사용자 질문을 부동산 DB 조회용 JSON 필터로 변환하라. 반드시 JSON만 출력하라.","input":"질문: 은평구 월세 보증금 7000 이하 월세 55 이하 10개","output":"{\"lease_type\":\"월세\",\"district\":\"은평구\",\"deposit_max\":70000000,\"monthly_rent_max\":550000,\"area_min_m2\":0,\"area_max_m2\":9999,\"building_name\":null,\"limit\":10,\"sort\":\"recent\"}"}
+{"instruction":"사용자 질문을 부동산 DB 조회용 JSON 필터로 변환하라. 반드시 JSON만 출력하라.","input":"질문: 온세샤인빌 월세 최근 5개","output":"{\"lease_type\":\"월세\",\"district\":null,\"deposit_max\":null,\"monthly_rent_max\":null,\"area_min_m2\":0,\"area_max_m2\":9999,\"building_name\":\"온세샤인빌\",\"limit\":5,\"sort\":\"recent\"}"}
+

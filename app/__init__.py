@@ -25,12 +25,13 @@ def create_app():
     from app import model, ml_model
 
     # Blueprint 등록
-    from .views import index_views, predict_views, support_views, login_views, inquiry_views, llama3_views
+    from .views import index_views, predict_views, support_views, login_views, inquiry_views, llama3_views, nlq_views
     app.register_blueprint(index_views.bp)
     app.register_blueprint(predict_views.bp)
     app.register_blueprint(support_views.bp)
     app.register_blueprint(login_views.bp)
     app.register_blueprint(inquiry_views.bp)
     app.register_blueprint(llama3_views.bp)
+    app.register_blueprint(nlq_views.bp)
 
     return app
